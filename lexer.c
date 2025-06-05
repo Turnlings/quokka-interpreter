@@ -3,9 +3,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include "file_utils.h"
 
-#define MAX_TOKENS 12
+#define MAX_TOKENS 16
 
 // Token can be identifier, keyword, seperator, operator, literal, comment or whitesepace
 #define IDENTIFIER 0
@@ -31,7 +32,9 @@ char* substring(const char *input, int left, int right) {
 }
 
 bool isOperator(char *s) {
-    return !(strcmp(s, "+") && strcmp(s, "-") && strcmp(s, "*") && strcmp(s, "/") && strcmp(s, "="));
+    return !(strcmp(s, "+") && strcmp(s, "-") && strcmp(s, "*") 
+          && strcmp(s, "/") && strcmp(s, "<-") && strcmp(s, "<") 
+          && strcmp(s, "<"));
 }
 
 bool isSeperator(char *s) {
@@ -40,6 +43,15 @@ bool isSeperator(char *s) {
 
 bool isWhitespace(char *s) {
     return !(strcmp(s, " ") && strcmp(s, "\n"));
+}
+
+bool isLiteral(char *s) {
+    for (int i = 0; i < strlen(s); i++) {
+        if (!isdigit(s[i])) {
+            return false;
+        }
+    }
+    return true; // No character was not a digit
 }
 
 Token* tokenize(char *input) {
@@ -61,9 +73,23 @@ Token* tokenize(char *input) {
 
         if (isOperator(s)) {
             tokens[n].category = OPERATOR;
-            token_found = true;
+            char* next = substring(input,left,right+1);
+            if (isOperator(next)) {
+                tokens[n].text = next;
+                n++;
+                right += 2;
+                left = right; 
+                free(s);
+                continue;
+            } else {
+                token_found = true;
+                free(next);
+            }
         } else if (isSeperator(s)) {
             tokens[n].category = SEPERATOR;
+            token_found = true;
+        } else if (isLiteral(s)) { // TODO: only works for single digits
+            tokens[n].category = LITERAL;
             token_found = true;
         } else if (isWhitespace(s)) {
             left = right;
@@ -73,6 +99,7 @@ Token* tokenize(char *input) {
             if (isOperator(next) || isSeperator(next) || isWhitespace(next)) {
                 tokens[n].category = IDENTIFIER;
                 token_found = true;
+                free(next);
             }
         }
 
