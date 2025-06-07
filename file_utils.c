@@ -32,3 +32,17 @@ char* readFile(char* name) {
     fclose(fptr);
     return buffer;
 }
+
+int writeFile(char* name, char* text) {
+    FILE *file = fopen(name, "w");
+    if (file == NULL) {
+        perror("Failed to open file");
+        return 1;
+    }
+
+    fputs(text, file);
+
+    fclose(file); 
+
+    return 0;
+}

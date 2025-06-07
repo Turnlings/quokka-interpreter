@@ -2,5 +2,6 @@
 #define FILE_UTILS_H
 
 char* readFile(char *name);
+int writeFile(char *name, char *text);
 
 #endif

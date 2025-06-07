@@ -5,22 +5,7 @@
 #include <assert.h>
 #include <ctype.h>
 #include "file_utils.h"
-
-#define MAX_TOKENS 16
-
-// Token can be identifier, keyword, seperator, operator, literal, comment or whitesepace
-#define IDENTIFIER 0
-#define KEYWORD 1
-#define SEPERATOR 2
-#define OPERATOR 3
-#define LITERAL 4
-#define COMMENT 5
-#define WHITESPACE 6
-
-typedef struct {
-    char category;
-    char *text;
-} Token;
+#include "token.h"
 
 char* substring(const char *input, int left, int right) {
     int length = right - left + 1;
@@ -54,12 +39,12 @@ bool isLiteral(char *s) {
     return true; // No character was not a digit
 }
 
-Token* tokenize(char *input) {
+Token* tokenize(char *input, int token_count) {
     int left = 0, right = 0;
     int len = strlen(input);
 
     int n = 0;
-    Token* tokens = malloc(MAX_TOKENS* sizeof(Token)); // TODO: make dynamic
+    Token* tokens = malloc(token_count* sizeof(Token)); // TODO: make dynamic
     if (tokens == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return NULL;
@@ -117,21 +102,21 @@ Token* tokenize(char *input) {
     return tokens;
 }
 
-int main() {
-    char *input = readFile("test.tu");
-    if (input) {
-        Token* tokens = tokenize(input);
+// int main() {
+//     char *input = readFile("test.tu");
+//     if (input) {
+//         Token* tokens = tokenize(input);
 
-        for (int i = 0; i < MAX_TOKENS; i++) {
-            printf("Token %d: category=%d, text='%s'\n", i, tokens[i].category, tokens[i].text);
+//         for (int i = 0; i < MAX_TOKENS; i++) {
+//             printf("Token %d: category=%d, text='%s'\n", i, tokens[i].category, tokens[i].text);
 
-            //if (tokens[i].text == NULL) { break; } // Intentionally after so 1 invalid gets printed
-        }
+//             //if (tokens[i].text == NULL) { break; } // Intentionally after so 1 invalid gets printed
+//         }
 
-        free(tokens);
-        free(input);
-    } else {
-        fprintf(stderr, "File read failed\n");
-    }
-    return 0;
-}
+//         free(tokens);
+//         free(input);
+//     } else {
+//         fprintf(stderr, "File read failed\n");
+//     }
+//     return 0;
+// }

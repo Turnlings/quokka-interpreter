@@ -1,2 +1,4 @@
 IDEAS.md
 **/lexer
+build/*
+.vscode/*
