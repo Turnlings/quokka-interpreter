@@ -13,6 +13,12 @@ typedef enum {
 } TokenType;
 
 typedef struct {
-    char category;
+    TokenType category;
     char *text;
 } Token;
+
+typedef struct {
+    TokenType type;
+    struct ParseNode **children;
+    int child_count;
+} ParseNode;

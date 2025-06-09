@@ -16,4 +16,10 @@ typedef struct {
     char *text;
 } Token;
 
+typedef struct {
+    TokenType type;
+    struct ParseNode **children;
+    int child_count;
+} ParseNode;
+
 #endif
