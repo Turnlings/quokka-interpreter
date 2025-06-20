@@ -18,8 +18,14 @@ typedef struct {
 
 typedef struct {
     TokenType type;
-    struct ParseNode **children;
-    int child_count;
+    union {
+        int intValue;
+        char *stringValue;
+    } data;
+    struct ParseNode *left;
+    struct ParseNode *right;
 } ParseNode;
+
+ParseNode *parse_node_create(TokenType type);
 
 #endif

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 /*
 * The tokens passed from the lexer to the syntax tree
 */
@@ -19,6 +21,23 @@ typedef struct {
 
 typedef struct {
     TokenType type;
-    struct ParseNode **children;
-    int child_count;
+    union {
+        int intValue;
+        char *stringValue;
+    } data;
+    struct ParseNode *left;
+    struct ParseNode *right;
 } ParseNode;
+
+ParseNode *parse_node_create(TokenType type){
+    ParseNode *node = malloc(sizeof(ParseNode));
+    if (!node) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+    node->type = type;
+
+    node->left = NULL;
+    node->right = NULL;
+    return node;
+}
