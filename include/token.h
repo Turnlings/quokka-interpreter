@@ -16,7 +16,7 @@ typedef struct {
     char *text;
 } Token;
 
-typedef struct {
+typedef struct ParseNode {
     TokenType type;
     union {
         int intValue;

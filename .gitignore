@@ -2,3 +2,4 @@ IDEAS.md
 **/lexer
 build/*
 .vscode/*
+transpiled.c

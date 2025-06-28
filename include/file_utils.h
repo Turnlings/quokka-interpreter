@@ -1,7 +1,7 @@
 #ifndef FILE_UTILS_H
 #define FILE_UTILS_H
 
-char* readFile(char *name);
-int writeFile(char *name, char *text);
+char* read_file(char *name);
+int write_file(char *name, char *text);
 
 #endif

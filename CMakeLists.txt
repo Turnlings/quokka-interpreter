@@ -7,10 +7,11 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 
 add_executable(compiler
     src/compiler.c
-    src/lexer.c
-    src/transpiler.c
     src/file_utils.c
+    src/lexer.c
+    src/parser.c
     src/token.c
+    src/transpiler.c
 )
 
 # Add include directories (headers in include/)
