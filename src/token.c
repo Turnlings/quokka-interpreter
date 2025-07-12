@@ -12,15 +12,17 @@ typedef enum {
     OPERATOR,
     LITERAL,
     COMMENT,
-    WHITESPACE
+    WHITESPACE,
+    ASSIGNMENT,
+    STATEMENT_LIST
 } TokenType;
 
-typedef struct {
+typedef struct Token {
     TokenType category;
     char *text;
 } Token;
 
-typedef struct {
+typedef struct ParseNode {
     TokenType type;
     union {
         int intValue;

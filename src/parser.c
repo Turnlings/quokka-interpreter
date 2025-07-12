@@ -1,6 +1,44 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "token.h"
+
+ParseNode* parse_statements(Token* tokens, int count) {
+    int start = 0;
+    ParseNode* list = NULL;
+    ParseNode* last = NULL;
+    for (int i = 0; i < count; ++i) {
+        if (tokens[i].category == SEPERATOR) {
+            int stmt_len = i - start;
+            if (stmt_len > 0) {
+                ParseNode* stmt = parse_expression(tokens + start, stmt_len);
+                ParseNode* node = parse_node_create(STATEMENT_LIST);
+                node->left = stmt;
+                node->right = NULL;
+                if (!list) {
+                    list = node;
+                } else {
+                    last->right = node;
+                }
+                last = node;
+            }
+            start = i + 1;
+        }
+    }
+    // Handle last statement if no trailing ;
+    if (start < count) {
+        ParseNode* stmt = parse_expression(tokens + start, count - start);
+        ParseNode* node = parse_node_create(STATEMENT_LIST);
+        node->left = stmt;
+        node->right = NULL;
+        if (!list) {
+            list = node;
+        } else {
+            last->right = node;
+        }
+    }
+    return list;
+}
 
 /**
  * parse_expression - converts array of tokens into a parse tree 
@@ -28,16 +66,24 @@ ParseNode *parse_expression(Token *tokens, int count) {
         // handle that?
     }
 
-    // Recursive cases
-    for (int i = 0; i < count; i++) {
-        if (tokens[i].category == OPERATOR ) { //&& strcmp(tokens[i].text, "+") == 0) {
-            ParseNode *node = parse_node_create(OPERATOR);
-            node->data.stringValue = strdup(tokens[i].text);
-
-            // Recursively parse left and right expressions
+    // Assignment: right-associative, so parse from right to left
+    for (int i = count - 1; i >= 0; i--) {
+        if (tokens[i].category == ASSIGNMENT) {
+            ParseNode *node = parse_node_create(ASSIGNMENT);
+            node->data.stringValue = strdup(tokens[i].text); // should be "<-"
             node->left = parse_expression(tokens, i);
             node->right = parse_expression(tokens + i + 1, count - i - 1);
+            return node;
+        }
+    }
 
+    // Operators: left-associative, so parse from left to right
+    for (int i = 0; i < count; i++) {
+        if (tokens[i].category == OPERATOR) {
+            ParseNode *node = parse_node_create(OPERATOR);
+            node->data.stringValue = strdup(tokens[i].text);
+            node->left = parse_expression(tokens, i);
+            node->right = parse_expression(tokens + i + 1, count - i - 1);
             return node;
         }
     }

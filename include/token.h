@@ -8,7 +8,9 @@ typedef enum {
     OPERATOR,
     LITERAL,
     COMMENT,
-    WHITESPACE
+    WHITESPACE,
+    ASSIGNMENT,
+    STATEMENT_LIST
 } TokenType;
 
 typedef struct {

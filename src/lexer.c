@@ -16,10 +16,13 @@ char* substring(const char *input, int left, int right) {
     return sub;
 }
 
+bool isAssignment(char *s) {
+    return strcmp(s, "<-") == 0;
+}
+
 bool isOperator(char *s) {
     return !(strcmp(s, "+") && strcmp(s, "-") && strcmp(s, "*") 
-          && strcmp(s, "/") && strcmp(s, "<-") && strcmp(s, "<") 
-          && strcmp(s, "<"));
+          && strcmp(s, "/") && strcmp(s, "<") && strcmp(s, "<"));
 }
 
 bool isSeperator(char *s) {
@@ -56,7 +59,14 @@ Token* tokenize(char *input, int token_count) {
 
         bool token_found = false;
 
-        if (isOperator(s)) {
+        if (isAssignment(s)) {
+            tokens[n].category = ASSIGNMENT;
+            tokens[n].text = s;
+            n++;
+            right++;
+            left = right;
+            continue;
+        } else if (isOperator(s)) {
             tokens[n].category = OPERATOR;
             char* next = substring(input,left,right+1);
             if (isOperator(next)) {
@@ -81,7 +91,7 @@ Token* tokenize(char *input, int token_count) {
             left ++;
         } else {
             char* next = substring(input,right+1,right+1);
-            if (isOperator(next) || isSeperator(next) || isWhitespace(next)) {
+            if (isOperator(next) || isSeperator(next) || isWhitespace(next) || isAssignment(next)) {
                 tokens[n].category = IDENTIFIER;
                 token_found = true;
                 free(next);
