@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "token.h"
+#include "parser.h"
 
 ParseNode* parse_statements(Token* tokens, int count) {
     int start = 0;
