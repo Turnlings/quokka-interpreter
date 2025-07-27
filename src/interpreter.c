@@ -7,7 +7,7 @@
 #include "transpiler.h"
 #include "parser.h"
 
-#define TOKEN_COUNT 128
+#define MAX_TOKEN_COUNT 128
 
 void print_ast(ParseNode *node);
 
@@ -17,13 +17,16 @@ int main() {
     char *input = read_file("quokka/test.qk");
     if (input) {
         // Tokenisation
-        Token *tokens = tokenize(input, TOKEN_COUNT);
+        int token_count = MAX_TOKEN_COUNT;
+        Token *tokens = tokenize(input, &token_count);
         if (tokens == NULL) {
             fprintf(stderr, "Tokenisation failed\n");
         }
 
+        printf("Token Count: %d\n", token_count);
+
         // Transpile to C from tokens to help debug tokenization
-        char* c_code = transpileToC(tokens, TOKEN_COUNT);
+        char* c_code = transpileToC(tokens, token_count);
         if (c_code == NULL) {
             fprintf(stderr, "Transpilation failed\n");
         }
@@ -31,7 +34,7 @@ int main() {
         write_file("transpiled.c", c_code);
 
         // Parsing
-        ParseNode *ast = parse_statements(tokens, TOKEN_COUNT);
+        ParseNode *ast = parse_statements(tokens, token_count);
         if (ast == NULL) {
             fprintf(stderr, "Parsing failed\n");
         }
@@ -67,6 +70,11 @@ void print_ast(ParseNode *node) {
             break;
         case IDENTIFIER:
             printf("%s", node->data.stringValue);
+            break;
+        case STATEMENT_LIST:
+            printf("STMT:");
+            print_ast(node->left);
+            print_ast(node->right);
             break;
         default:
             printf("?");

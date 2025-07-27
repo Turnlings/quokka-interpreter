@@ -42,12 +42,12 @@ bool isLiteral(char *s) {
     return true; // No character was not a digit
 }
 
-Token* tokenize(char *input, int token_count) {
+Token* tokenize(char *input, int *token_count) {
     int left = 0, right = 0;
     int len = strlen(input);
 
     int n = 0;
-    Token* tokens = malloc(token_count* sizeof(Token)); // TODO: make dynamic
+    Token* tokens = malloc(*token_count * sizeof(Token)); // TODO: make dynamic
     if (tokens == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return NULL;
@@ -108,6 +108,9 @@ Token* tokenize(char *input, int token_count) {
             free(s);
         }
     }
+
+    // Update token count
+    *token_count = n;
 
     return tokens;
 }

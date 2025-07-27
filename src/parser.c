@@ -5,10 +5,11 @@
 #include "parser.h"
 
 ParseNode* parse_statements(Token* tokens, int count) {
+    if (count <= 0) return NULL;
     int start = 0;
     ParseNode* list = NULL;
     ParseNode* last = NULL;
-    for (int i = 0; i < count; ++i) {
+    for (int i = 0; i < count; i++) {
         if (tokens[i].category == SEPERATOR) {
             int stmt_len = i - start;
             if (stmt_len > 0) {
@@ -26,6 +27,7 @@ ParseNode* parse_statements(Token* tokens, int count) {
             start = i + 1;
         }
     }
+
     // Handle last statement if no trailing ;
     if (start < count) {
         ParseNode* stmt = parse_expression(tokens + start, count - start);
@@ -50,6 +52,10 @@ ParseNode* parse_statements(Token* tokens, int count) {
  * @return The root of the parse tree
  */
 ParseNode *parse_expression(Token *tokens, int count) {
+    if (count == 0) {
+        fprintf(stderr, "Passed an empty token to parse_expression\n");
+        return NULL;
+    }
     // Base cases
     if (count == 1) {
         if (tokens[0].category == LITERAL) {
