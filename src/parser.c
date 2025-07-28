@@ -84,18 +84,37 @@ ParseNode *parse_expression(Token *tokens, int count) {
         }
     }
 
+    // TODO: look at precedence climbing as currently does not handle BIDMAS
+
     // Operators: left-associative, so parse from left to right
     for (int i = 0; i < count; i++) {
-        if (tokens[i].category == OPERATOR) {
-            ParseNode *node = parse_node_create(OPERATOR);
-            node->data.stringValue = strdup(tokens[i].text);
+        TokenType type = tokens[i].category;
+
+        if (is_operator(type)) {
+            ParseNode *node = NULL;
+
+            switch (type) {
+                case OP_ADD:
+                    node = parse_node_create(OP_ADD);
+                    break;
+                case OP_SUB:
+                    node = parse_node_create(OP_SUB);
+                    break;
+                case OP_MUL:
+                    node = parse_node_create(OP_MUL);
+                    break;
+                case OP_DIV:
+                    node = parse_node_create(OP_DIV);
+                    break;
+            }
+            node->data.stringValue = tokens[i].text;
             node->left = parse_expression(tokens, i);
             node->right = parse_expression(tokens + i + 1, count - i - 1);
             return node;
         }
     }
 
-    // If nothing found then invalid expression, end this branch
+    // If nothing found then expression is invalid
     return NULL;
 }
 

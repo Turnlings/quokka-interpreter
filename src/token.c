@@ -9,13 +9,20 @@ typedef enum {
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,
-    OPERATOR,
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
     LITERAL,
     COMMENT,
     WHITESPACE,
     ASSIGNMENT,
     STATEMENT_LIST
 } TokenType;
+
+int is_operator(TokenType type) {
+    return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV;
+}
 
 typedef struct Token {
     TokenType category;

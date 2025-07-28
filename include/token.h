@@ -1,17 +1,22 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-typedef enum {
+typedef enum TokenType {
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,
-    OPERATOR,
+    OP_ADD,
+    OP_SUB,
+    OP_MUL,
+    OP_DIV,
     LITERAL,
     COMMENT,
     WHITESPACE,
     ASSIGNMENT,
     STATEMENT_LIST
 } TokenType;
+
+int is_operator(TokenType type);
 
 typedef struct {
     TokenType category;

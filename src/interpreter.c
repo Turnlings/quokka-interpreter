@@ -69,7 +69,10 @@ void print_ast(ParseNode *node) {
         case LITERAL:
             printf("NUM: %d", node->data.intValue);
             break;
-        case OPERATOR:
+        case OP_ADD:
+        case OP_SUB:
+        case OP_MUL:
+        case OP_DIV:
             printf("(%s", node->data.stringValue);
             print_ast(node->left);
             printf(",");

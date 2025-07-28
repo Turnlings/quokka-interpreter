@@ -25,6 +25,23 @@ bool isOperator(char *s) {
           && strcmp(s, "/") && strcmp(s, "<") && strcmp(s, "<"));
 }
 
+
+// TODO: incomplete
+TokenType operator_category(char *s) {
+    if (strcmp(s, "+") == 0) {
+        return OP_ADD;
+    }
+    if (strcmp(s, "-") == 0) {
+        return OP_SUB;
+    }
+    if (strcmp(s, "*") == 0) {
+        return OP_MUL;
+    }
+    if (strcmp(s, "/") == 0) {
+        return OP_DIV;
+    }
+}
+
 bool isSeperator(char *s) {
     return strcmp(s, ";") == 0;
 }
@@ -67,16 +84,17 @@ Token* tokenize(char *input, int *token_count) {
             left = right;
             continue;
         } else if (isOperator(s)) {
-            tokens[n].category = OPERATOR;
             char* next = substring(input,left,right+1);
             if (isOperator(next)) {
                 tokens[n].text = next;
+                tokens[n].category = operator_category(next);
                 n++;
                 right += 2;
                 left = right; 
                 free(s);
                 continue;
             } else {
+                tokens[n].category = operator_category(s);
                 token_found = true;
                 free(next);
             }
@@ -114,22 +132,3 @@ Token* tokenize(char *input, int *token_count) {
 
     return tokens;
 }
-
-// int main() {
-//     char *input = readFile("test.tu");
-//     if (input) {
-//         Token* tokens = tokenize(input);
-
-//         for (int i = 0; i < MAX_TOKENS; i++) {
-//             printf("Token %d: category=%d, text='%s'\n", i, tokens[i].category, tokens[i].text);
-
-//             //if (tokens[i].text == NULL) { break; } // Intentionally after so 1 invalid gets printed
-//         }
-
-//         free(tokens);
-//         free(input);
-//     } else {
-//         fprintf(stderr, "File read failed\n");
-//     }
-//     return 0;
-// }

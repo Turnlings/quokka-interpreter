@@ -12,10 +12,16 @@ int evaluate(ParseNode *node) {
             return evaluate(node->left); // TODO: temp for single statement
         case LITERAL:
             return node->data.intValue;
-        case OPERATOR:
+        case OP_ADD:
             return evaluate(node->left) + evaluate(node->right);
+        case OP_SUB:
+            return evaluate(node->left) - evaluate(node->right);
+        case OP_MUL:
+            return evaluate(node->left) * evaluate(node->right);
+        case OP_DIV:
+            return evaluate(node->left) / evaluate(node->right);
         default:
-            fprintf(stderr, "Error evaluating Node\n");
+            fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
             return NULL;
     }
 }

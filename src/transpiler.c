@@ -39,7 +39,7 @@ char* transpileToC(Token *tokens, int token_count) {
                 strcat(output, "int ");
             }
             strcat(output, tokens[i].text);
-        } else if (tokens[i].category == OPERATOR) {
+        } else if (is_operator(tokens[i].category)) {
             if (strcmp(tokens[i].text, "<-") == 0) {
                 strcat(output, "=");
             } else {
