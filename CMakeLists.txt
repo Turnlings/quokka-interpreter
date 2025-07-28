@@ -12,6 +12,7 @@ add_executable(interpreter
     src/parser.c
     src/token.c
     src/transpiler.c
+    src/evaluator.c
 )
 
 # Add include directories (headers in include/)

@@ -6,6 +6,7 @@
 #include "lexer.h"
 #include "transpiler.h"
 #include "parser.h"
+#include "evaluator.h"
 
 #define MAX_TOKEN_COUNT 128
 
@@ -42,6 +43,13 @@ int main() {
         // Debug check parsing
         print_ast(ast);
         printf("\n");
+
+        int return_value = evaluate(ast);
+        if (ast == NULL) {
+            fprintf(stderr, "Evaluation failed\n");
+        }
+
+        printf("Evaluation Return Value: %d", return_value);
 
         free(tokens);
         free(input);
