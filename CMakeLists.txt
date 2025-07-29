@@ -5,15 +5,13 @@ project(QuokkaInterpreter C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED True)
 
-add_executable(interpreter
-    src/interpreter.c
-    src/file_utils.c
-    src/lexer.c
-    src/parser.c
-    src/token.c
-    src/transpiler.c
-    src/evaluator.c
+# Collect all .c files from src/ and src/utils/
+file(GLOB SRC_FILES
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/*.c"
 )
+
+add_executable(interpreter ${SRC_FILES})
 
 # Add include directories (headers in include/)
 target_include_directories(interpreter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

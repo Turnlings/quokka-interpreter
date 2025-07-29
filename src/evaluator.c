@@ -9,7 +9,8 @@
 int evaluate(ParseNode *node) {
     switch (node->type) {
         case STATEMENT_LIST:
-            return evaluate(node->left); // TODO: temp for single statement
+            evaluate(node->left);
+            evaluate(node->right);
         case LITERAL:
             return node->data.intValue;
         case OP_ADD:

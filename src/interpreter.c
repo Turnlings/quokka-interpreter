@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include "file_utils.h"
+#include "utils/file_utils.h"
 #include "token.h"
 #include "lexer.h"
 #include "transpiler.h"

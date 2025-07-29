@@ -4,7 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "file_utils.h"
+#include "utils/file_utils.h"
 #include "token.h"
 
 char* substring(const char *input, int left, int right) {

@@ -1,8 +1,7 @@
-# Quokka
+# Quokka Documentation
 
-## TODO
+## TODO:
 
-- All parts following parser
 - Conditionals
 
 ## Lexer
@@ -19,7 +18,9 @@ SEMI-COLON : {;}
 
 ## Parser
 
-Defined by the following context free grammar
+Builds an Abstract Syntax Tree (AST) using recursive descent parsing.  
+
+Defined by the following context free grammar:
 
 ```
 <program>    ::= <statement> | <statement> <program>
@@ -28,6 +29,6 @@ Defined by the following context free grammar
 <term>       ::= IDENTIFIER | NUMBER 
 ```
 
-## Transpiler 
+## Evaluator
 
-Converts to C code
+Evaluates the AST to "run" the program itself.
