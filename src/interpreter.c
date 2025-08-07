@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "utils/file_utils.h"
+#include "utils/hash_table.h"
 #include "token.h"
 #include "lexer.h"
 #include "transpiler.h"
@@ -9,6 +10,7 @@
 #include "evaluator.h"
 
 #define MAX_TOKEN_COUNT 128
+#define MAX_SYMBOL_COUNT 128
 
 void print_ast(ParseNode *node);
 
@@ -44,12 +46,16 @@ int main() {
         print_ast(ast);
         printf("\n");
 
-        int return_value = evaluate(ast);
-        if (ast == NULL) {
+        HashTable *symbolTable = hash_table_create(MAX_SYMBOL_COUNT);
+
+        int return_value = evaluate(ast, symbolTable);
+        if (return_value == NULL) {
             fprintf(stderr, "Evaluation failed\n");
         }
 
-        printf("Evaluation Return Value: %d", return_value);
+        hashtable_destroy(symbolTable);
+
+        printf("Evaluation Return Value: %d\n", return_value);
 
         free(tokens);
         free(input);
@@ -67,20 +73,26 @@ void print_ast(ParseNode *node) {
 
     switch (node->type) {
         case LITERAL:
-            printf("NUM: %d", node->data.intValue);
+            printf("NUM: %d", node->value.data.intValue);
             break;
         case OP_ADD:
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
-            printf("(%s", node->data.stringValue);
+            printf("(%s", node->value.data.stringValue);
             print_ast(node->left);
             printf(",");
             print_ast(node->right);
             printf(")");
             break;
         case IDENTIFIER:
-            printf("%s", node->data.stringValue);
+            printf("%s", node->value.data.stringValue);
+            break;
+        case ASSIGNMENT:
+            printf(" = ");
+            print_ast(node->left);
+            printf(",");
+            print_ast(node->right);
             break;
         case STATEMENT_LIST:
             printf("STMT:");

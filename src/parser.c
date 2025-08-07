@@ -48,12 +48,12 @@ ParseNode *parse_expression(Token *tokens, int count) {
     if (count == 1) {
         if (tokens[0].category == LITERAL) {
             ParseNode *node = parse_node_create(LITERAL);
-            node->data.intValue = atoi(tokens[0].text);
+            node->value.data.intValue = atoi(tokens[0].text);
             return node;
         }
         if (tokens[0].category == IDENTIFIER) {
             ParseNode *node = parse_node_create(IDENTIFIER);
-            node->data.stringValue = tokens[0].text;
+            node->value.data.stringValue = tokens[0].text;
             return node;
         }
 
@@ -65,7 +65,7 @@ ParseNode *parse_expression(Token *tokens, int count) {
     for (int i = count - 1; i >= 0; i--) {
         if (tokens[i].category == ASSIGNMENT) {
             ParseNode *node = parse_node_create(ASSIGNMENT);
-            node->data.stringValue = strdup(tokens[i].text); // should be "<-"
+            node->value.data.stringValue = strdup(tokens[i].text);
             node->left = parse_expression(tokens, i);
             node->right = parse_expression(tokens + i + 1, count - i - 1);
             return node;
@@ -95,7 +95,7 @@ ParseNode *parse_expression(Token *tokens, int count) {
                     node = parse_node_create(OP_DIV);
                     break;
             }
-            node->data.stringValue = tokens[i].text;
+            node->value.data.stringValue = tokens[i].text;
             node->left = parse_expression(tokens, i);
             node->right = parse_expression(tokens + i + 1, count - i - 1);
             return node;
@@ -107,7 +107,7 @@ ParseNode *parse_expression(Token *tokens, int count) {
 }
 
 int get_precedence(const char *op) {
-    if (strcmp(op, "<-") == 0) return 4;
+    if (strcmp(op, "=") == 0) return 4;
     if (strcmp(op, "*") == 0 || strcmp(op, "/") == 0) return 2;
     if (strcmp(op, "+") == 0 || strcmp(op, "-") == 0) return 1;
     return 0;

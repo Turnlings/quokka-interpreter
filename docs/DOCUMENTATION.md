@@ -12,7 +12,7 @@ Parses the string of the input file and tokenizes it into the following sets
 IDENTIFIER : {a-z}+
 NUMBER     : {0..9}+
 OPERATOR   : {+,-,*,/}
-ASSIGNMENT : {<-}
+ASSIGNMENT : {=}
 SEMI-COLON : {;}
 ```
 

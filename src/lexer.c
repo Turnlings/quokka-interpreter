@@ -17,12 +17,12 @@ char* substring(const char *input, int left, int right) {
 }
 
 bool isAssignment(char *s) {
-    return strcmp(s, "<-") == 0;
+    return strcmp(s, "=") == 0;
 }
 
 bool isOperator(char *s) {
     return !(strcmp(s, "+") && strcmp(s, "-") && strcmp(s, "*") 
-          && strcmp(s, "/") && strcmp(s, "<") && strcmp(s, "<"));
+          && strcmp(s, "/") && strcmp(s, "<") && strcmp(s, ">"));
 }
 
 

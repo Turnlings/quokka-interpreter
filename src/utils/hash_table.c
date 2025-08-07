@@ -1,9 +1,10 @@
 #include <stdlib.h>
 #include <string.h>
+#include "token.h"
 
 typedef struct Pair {
     char *key;
-    double value;
+    Value value;
     struct Pair *next;
 } Pair;
 
@@ -51,14 +52,17 @@ HashTable *hash_table_create(size_t size) {
  * @param key The key string.
  * @param value The value associated with the key.
  */
-void hash_table_set(HashTable *table, char *key, double value) {
+void hash_table_set(HashTable *table, char *key, Value *value) {
+    if (value == NULL) {
+        printf("Attempted to assign null to identifier\n");
+    }
     unsigned int pos = hash(key, table->size);
     Pair *entry = table->buckets[pos];
 
     while (entry) {
         // Identical key: update value
         if (strcmp(entry->key, key) == 0) {
-            entry->value = value;
+            entry->value = *value;
             return;
         }
         // Collision: append entry to linked list
@@ -68,7 +72,7 @@ void hash_table_set(HashTable *table, char *key, double value) {
     // No collision: add entry at that position
     Pair *new_entry = malloc(sizeof(Pair));
     new_entry->key = strdup(key);
-    new_entry->value = value;
+    new_entry->value = *value;
     new_entry->next = table->buckets[pos];
     table->buckets[pos] = new_entry;
 }
@@ -81,7 +85,7 @@ void hash_table_set(HashTable *table, char *key, double value) {
  * @param out_value A pointer to the value at the key.
  * @return Status of 1 if successful and 0 if not.
  */
-int hashtable_get(HashTable *table, const char *key, double *out_value) {
+int hashtable_get(HashTable *table, const char *key, Value *out_value) {
     if (!table) return 0;
     unsigned int pos = hash(key, table->size);
     Pair *entry = table->buckets[pos];
@@ -99,7 +103,7 @@ int hashtable_get(HashTable *table, const char *key, double *out_value) {
  * @brief Properly handles the deletion of all parts of the hash table.
  * @param table The hash table to destroy.
  */
-void hashtable_destroy(HashTable *table) {
+void hashtable_destroy(HashTable *table) { // TODO: does this leak values?
     if (!table) return;
     for (size_t i = 0; i < table->size; i++) {
         Pair *entry = table->buckets[i];

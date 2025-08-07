@@ -2,10 +2,11 @@
 #define HASH_TABLE_H
 
 #include <stddef.h>
+#include "token.h"
 
 typedef struct Pair {
     char *key;
-    double value;
+    Value value;
     struct Pair *next;
 } Pair;
 
@@ -15,8 +16,8 @@ typedef struct HashTable {
 } HashTable;
 
 HashTable *hash_table_create(size_t size);
-void hash_table_set(HashTable *table, char *key, double value);
-int hashtable_get(HashTable *table, const char *key, double *out_value);
+void hash_table_set(HashTable *table, char *key, Value *value);
+int hashtable_get(HashTable *table, const char *key, Value *out_value);
 void hashtable_destroy(HashTable *table);
 
 #endif

@@ -18,17 +18,29 @@ typedef enum TokenType {
 
 int is_operator(TokenType type);
 
-typedef struct {
+typedef enum {
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_STRING,
+} ValueType;
+
+typedef struct Value {
+    ValueType type;
+    union {
+        int intValue;
+        float floatValue;
+        char *stringValue;
+    } data;
+} Value;
+
+typedef struct Token {
     TokenType category;
     char *text;
 } Token;
 
 typedef struct ParseNode {
     TokenType type;
-    union {
-        int intValue;
-        char *stringValue;
-    } data;
+    Value value;
     struct ParseNode *left;
     struct ParseNode *right;
 } ParseNode;

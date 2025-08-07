@@ -24,6 +24,21 @@ int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV;
 }
 
+typedef enum {
+    TYPE_INT,
+    TYPE_FLOAT,
+    TYPE_STRING,
+} ValueType;
+
+typedef struct Value {
+    ValueType type;
+    union {
+        int intValue;
+        float floatValue;
+        char *stringValue;
+    } data;
+} Value;
+
 typedef struct Token {
     TokenType category;
     char *text;
@@ -31,10 +46,7 @@ typedef struct Token {
 
 typedef struct ParseNode {
     TokenType type;
-    union {
-        int intValue;
-        char *stringValue;
-    } data;
+    Value value;
     struct ParseNode *left;
     struct ParseNode *right;
 } ParseNode;
