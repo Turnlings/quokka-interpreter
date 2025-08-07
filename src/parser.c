@@ -28,18 +28,6 @@ ParseNode* parse_statements(Token* tokens, int count) {
         }
     }
 
-    // Handle last statement if no trailing ;
-    if (start < count) {
-        ParseNode* stmt = parse_expression(tokens + start, count - start);
-        ParseNode* node = parse_node_create(STATEMENT_LIST);
-        node->left = stmt;
-        node->right = NULL;
-        if (!list) {
-            list = node;
-        } else {
-            last->right = node;
-        }
-    }
     return list;
 }
 
