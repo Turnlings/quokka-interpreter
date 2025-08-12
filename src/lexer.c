@@ -4,8 +4,100 @@
 #include <string.h>
 #include <assert.h>
 #include <ctype.h>
-#include "utils/file_utils.h"
 #include "token.h"
+#include "lexer.h"
+
+int start = 0, current = 0;
+
+Token *tokens;
+int token_count;
+char *source;
+
+Token* tokenize(char *input, int *max_token_count) {
+    source = input; 
+    start = 0;
+    current = 0;
+    token_count = 0;
+
+    tokens = malloc(*max_token_count * sizeof(Token));
+    if (!tokens) return NULL;
+
+    while (source[current] != '\0') {
+        start = current; // mark start of token
+        char c = advance();
+        switch (c) {
+            case '+': add_token(OP_ADD); break;
+            case '-': add_token(match('>') ? RETURN : OP_SUB); break;
+            case '*': add_token(OP_MUL); break;
+            case '/': add_token(OP_DIV); break;
+            case '=': add_token(ASSIGNMENT); break;
+            case ';': add_token(SEPERATOR); break;
+            default:
+                if (isDigit(c)) {
+                    number();
+                } else if (isAlpha(c)) {
+                    identifier();
+                }
+                break;
+        }
+    }
+
+    *max_token_count = token_count;
+    return tokens;
+}
+
+char peek() {
+    return source[current];
+}
+
+void add_token(TokenType type) {
+    tokens[token_count].category = type;
+    tokens[token_count].text = substring(source, start, current - 1);
+    token_count++;
+}
+
+void add_token_string(TokenType type, char* text) {
+    tokens[token_count].category = type;
+    tokens[token_count].text = text;
+    token_count++;
+}
+
+char advance() {
+    return source[current++];
+}
+
+bool match(char c) {
+    if (c != source[current]) { return false; }
+
+    current++;
+    return true;
+}
+
+void number() {
+    while (isDigit(peek())) advance();
+
+    add_token_string(LITERAL, substring(source, start, current - 1));
+}
+
+void identifier() {
+    while (isAlphaNumeric(peek())) advance();
+
+    add_token_string(IDENTIFIER, substring(source, start, current - 1));
+}
+
+bool isDigit(char c) {
+    return c >= '0' && c <= '9';
+}
+
+bool isAlpha(char c) {
+    return (c >= 'a' && c <= 'z') ||
+           (c >= 'A' && c <= 'Z') ||
+            c == '_';
+}
+
+bool isAlphaNumeric(char c) {
+    return isAlpha(c) || isDigit(c);
+}
 
 char* substring(const char *input, int left, int right) {
     int length = right - left + 1;
@@ -14,121 +106,4 @@ char* substring(const char *input, int left, int right) {
     strncpy(sub, input + left, length);
     sub[length] = '\0';
     return sub;
-}
-
-bool isAssignment(char *s) {
-    return strcmp(s, "=") == 0;
-}
-
-bool isOperator(char *s) {
-    return !(strcmp(s, "+") && strcmp(s, "-") && strcmp(s, "*") 
-          && strcmp(s, "/") && strcmp(s, "<") && strcmp(s, ">"));
-}
-
-
-// TODO: incomplete
-TokenType operator_category(char *s) {
-    if (strcmp(s, "+") == 0) {
-        return OP_ADD;
-    }
-    if (strcmp(s, "-") == 0) {
-        return OP_SUB;
-    }
-    if (strcmp(s, "*") == 0) {
-        return OP_MUL;
-    }
-    if (strcmp(s, "/") == 0) {
-        return OP_DIV;
-    }
-}
-
-bool isSeperator(char *s) {
-    return strcmp(s, ";") == 0;
-}
-
-bool isWhitespace(char *s) {
-    return !(strcmp(s, " ") && strcmp(s, "\n"));
-}
-
-bool isLiteral(char *s) {
-    for (int i = 0; i < strlen(s); i++) {
-        if (!isdigit(s[i])) {
-            return false;
-        }
-    }
-    return true; // No character was not a digit
-}
-
-Token* tokenize(char *input, int *token_count) {
-    int left = 0, right = 0;
-    int len = strlen(input);
-
-    int n = 0;
-    Token* tokens = malloc(*token_count * sizeof(Token)); // TODO: make dynamic
-    if (tokens == NULL) {
-        fprintf(stderr, "Memory allocation failed\n");
-        return NULL;
-    }
-
-    while (right <= len && left <= right) {
-        char* s = substring(input, left, right);
-        assert(s != NULL);
-
-        bool token_found = false;
-
-        if (isAssignment(s)) {
-            tokens[n].category = ASSIGNMENT;
-            tokens[n].text = s;
-            n++;
-            right++;
-            left = right;
-            continue;
-        } else if (isOperator(s)) {
-            char* next = substring(input,left,right+1);
-            if (isOperator(next)) {
-                tokens[n].text = next;
-                tokens[n].category = operator_category(next);
-                n++;
-                right += 2;
-                left = right; 
-                free(s);
-                continue;
-            } else {
-                tokens[n].category = operator_category(s);
-                token_found = true;
-                free(next);
-            }
-        } else if (isSeperator(s)) {
-            tokens[n].category = SEPERATOR;
-            token_found = true;
-        } else if (isLiteral(s)) { // TODO: only works for single digits
-            tokens[n].category = LITERAL;
-            token_found = true;
-        } else if (isWhitespace(s)) {
-            left = right;
-            left ++;
-        } else {
-            char* next = substring(input,right+1,right+1);
-            if (isOperator(next) || isSeperator(next) || isWhitespace(next) || isAssignment(next)) {
-                tokens[n].category = IDENTIFIER;
-                token_found = true;
-                free(next);
-            }
-        }
-
-        right++;
-
-        if (token_found) {
-            tokens[n].text = s;
-            n++;
-            left = right;
-        } else {
-            free(s);
-        }
-    }
-
-    // Update token count
-    *token_count = n;
-
-    return tokens;
 }
