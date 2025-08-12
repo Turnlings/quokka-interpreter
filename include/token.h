@@ -9,11 +9,17 @@ typedef enum TokenType {
     OP_SUB,
     OP_MUL,
     OP_DIV,
+    RETURN,
     LITERAL,
     COMMENT,
     WHITESPACE,
     ASSIGNMENT,
-    STATEMENT_LIST
+    STATEMENT_LIST,
+
+    // For if statments
+    IF,
+    THEN,
+    END
 } TokenType;
 
 int is_operator(TokenType type);

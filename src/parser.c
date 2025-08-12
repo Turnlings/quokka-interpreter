@@ -61,6 +61,18 @@ ParseNode *parse_expression(Token *tokens, int count) {
         // handle that?
     }
 
+        // Conditional
+    for (int i = 0; i < count; i++) {
+        switch (tokens[i].category) {
+            case IF:
+                ParseNode *node = parse_node_create(IF);
+                node->value.data.stringValue = strdup(tokens[i].text);
+                node->left = parse_expression(tokens, i);
+                node->right = parse_expression(tokens + i + 1, count - i - 1);
+                return node;
+        }
+    }
+
     // Assignment: right-associative, so parse from right to left
     for (int i = count - 1; i >= 0; i--) {
         if (tokens[i].category == ASSIGNMENT) {

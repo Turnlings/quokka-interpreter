@@ -99,6 +99,11 @@ void print_ast(ParseNode *node) {
             print_ast(node->left);
             print_ast(node->right);
             break;
+        case IF:
+            printf("IF ");
+            print_ast(node->left);
+            printf("THEN ");
+            print_ast(node->right);
         default:
             printf("?");
     }

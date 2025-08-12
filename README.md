@@ -10,3 +10,15 @@ For detailed documentation, see the [docs/](docs) folder.
 ## Motivation
 
 This project was created to explore the design and implementation of interpreters and to deepen my understanding of the C programming language.
+
+## Language Features
+
+- Simple arithmetic
+- Integer variables
+- Basic conditionals
+
+## Planned
+
+- More types (float, string etc)
+- Complex conditionals
+- Functions

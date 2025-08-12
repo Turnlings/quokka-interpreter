@@ -27,11 +27,14 @@ Token* tokenize(char *input, int *max_token_count) {
         char c = advance();
         switch (c) {
             case '+': add_token(OP_ADD); break;
-            case '-': add_token(match('>') ? RETURN : OP_SUB); break;
+            case '-': add_token(OP_SUB); break;
             case '*': add_token(OP_MUL); break;
             case '/': add_token(OP_DIV); break;
             case '=': add_token(ASSIGNMENT); break;
             case ';': add_token(SEPERATOR); break;
+            case '?': add_token(IF); break;
+            case '{': add_token(THEN); break;
+            case '}': add_token(END); break;
             default:
                 if (isDigit(c)) {
                     number();

@@ -2,7 +2,7 @@
 
 ## TODO:
 
-- Conditionals
+*See README for up to date features to be implemented*
 
 ## Lexer
 

@@ -49,6 +49,12 @@ int evaluate(ParseNode *node, HashTable *symbolTable) {
             return evaluate(node->left, symbolTable) * evaluate(node->right, symbolTable);
         case OP_DIV:
             return evaluate(node->left, symbolTable) / evaluate(node->right, symbolTable);
+        case IF:
+            if ( evaluate(node->left, symbolTable) ) { 
+                return evaluate(node->right, symbolTable); 
+            } else {
+                return 0;
+            }
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
             return NULL;
