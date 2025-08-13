@@ -61,37 +61,7 @@ int evaluate(ParseNode *node) {
                 case TYPE_INT:
                     return id_value.data.intValue;
                 case TYPE_FUNCTION:
-                    // Create new stack frame for function call
-                    StackFrame* frame = malloc(sizeof(StackFrame));
-                    frame->local_variables = hashtable_create(32);
-
-                    // Get the param and arg
-                    ParseNode *param = id_value.data.node->left->right;
-                    ParseNode *arg = node->right;
-
-                    // Bind parameter to argument
-                    while (param && arg) {
-                        Value value;
-                        value.type = TYPE_INT;
-                        value.data.intValue = evaluate(arg);
-                        hashtable_set(frame->local_variables, 
-                                    param->value.data.stringValue, 
-                                    &value);
-
-                        param = param->right;
-                        arg = arg->right;
-                    }
-
-                    // Push new variables onto callstack
-                    stack_push(callStack, frame);
-
-                    // Evaluate function body
-                    int result = evaluate(id_value.data.node->right);
-                    
-                    // Clean up stack frame
-                    stack_pop(callStack);
-
-                    return result;
+                    return execute_function(node, &id_value);
             }
         case LITERAL:
             return node->value.data.intValue;
@@ -123,4 +93,38 @@ int evaluate(ParseNode *node) {
             fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
             return 0;
     }
+}
+
+int execute_function(ParseNode *node, Value *id_value) {
+    // Create new stack frame for function call
+    StackFrame* frame = malloc(sizeof(StackFrame));
+    frame->local_variables = hashtable_create(32);
+
+    // Get the param and arg
+    ParseNode *param = id_value->data.node->left->right;
+    ParseNode *arg = node->right;
+
+    // Bind parameter to argument
+    while (param && arg) {
+        Value value;
+        value.type = TYPE_INT;
+        value.data.intValue = evaluate(arg);
+        hashtable_set(frame->local_variables, 
+                    param->value.data.stringValue, 
+                    &value);
+
+        param = param->right;
+        arg = arg->right;
+    }
+
+    // Push new variables onto callstack
+    stack_push(callStack, frame);
+
+    // Evaluate function body
+    int result = evaluate(id_value->data.node->right);
+    
+    // Clean up stack frame
+    stack_pop(callStack);
+
+    return result;
 }
