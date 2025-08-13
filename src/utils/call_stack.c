@@ -27,19 +27,17 @@ void stack_init(CallStack *stack) {
 
 void stack_push(CallStack *stack, StackFrame *frame) {
     // TODO: free any stackframe that may be overwitten
-    printf("STACK TOP E: %d\n", stack->top);
     if (stack->top + 1 < MAX_FRAMES) {
         stack->frames[++stack->top] = frame;
     } else {
         fprintf(stderr, "Stack Overflow!!!");
         exit(1);
     }
-    printf("STACK TOP F: %d\n", stack->top);
 }
 
 StackFrame *stack_pop(CallStack *stack) {
     if (stack->top >= 0) {
-        return &stack->frames[stack->top--];
+        return stack->frames[stack->top--];
     } else {
         fprintf(stderr, "Stack Underflow");
         exit(1);
@@ -53,8 +51,9 @@ StackFrame *stack_peek(CallStack *stack) {
 // Descend stack to get all
 int stack_get_value(CallStack *stack, const char *key, Value *out_value) {
     for (int i = stack->top; i >= 0; i--) {
-        hashtable_get(stack->frames[i]->local_variables, key, out_value);
-        if (out_value != NULL) {
+        int found = hashtable_get(stack->frames[i]->local_variables, key, out_value);
+        if (found && out_value != NULL) {
+            //printf("'%s' found on layer %d\n", key, i);
             return 1;
         }
     }

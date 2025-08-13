@@ -1,11 +1,6 @@
 mul a b => a * b;
 
-mul 2 3;
+double x => mul x 2;
 
-a = 2;
-b = 3;
-l = 6;
-
-a;
-
-mul a b;
+a = 9;
+double a;
