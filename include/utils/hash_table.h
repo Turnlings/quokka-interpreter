@@ -15,8 +15,8 @@ typedef struct HashTable {
     Pair **buckets;
 } HashTable;
 
-HashTable *hash_table_create(size_t size);
-void hash_table_set(HashTable *table, char *key, Value *value);
+HashTable *hashtable_create(size_t size);
+void hashtable_set(HashTable *table, char *key, Value *value);
 int hashtable_get(HashTable *table, const char *key, Value *out_value);
 void hashtable_destroy(HashTable *table);
 

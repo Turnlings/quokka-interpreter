@@ -2,6 +2,10 @@ mul a b => a * b;
 
 mul 2 3;
 
-a = 1;
-b = 2;
-a + b;
+a = 2;
+b = 3;
+l = 6;
+
+a;
+
+mul a b;

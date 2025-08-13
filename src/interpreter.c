@@ -46,7 +46,7 @@ int main() {
         print_ast(ast);
         printf("\n");
 
-        HashTable *symbolTable = hash_table_create(MAX_SYMBOL_COUNT);
+        HashTable *symbolTable = hashtable_create(MAX_SYMBOL_COUNT);
 
         int return_value = evaluate(ast, symbolTable);
         if (return_value == NULL) {

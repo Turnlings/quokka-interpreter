@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "token.h"
 
@@ -34,7 +35,7 @@ static unsigned int hash(const char* key, size_t size) {
  * @param size The number of buckets in the hash table.
  * @return A pointer to the hash table.
  */
-HashTable *hash_table_create(size_t size) {
+HashTable *hashtable_create(size_t size) {
     HashTable* table = malloc(sizeof(HashTable));
     if (!table) return NULL;
     table->size = size;
@@ -52,7 +53,7 @@ HashTable *hash_table_create(size_t size) {
  * @param key The key string.
  * @param value The value associated with the key.
  */
-void hash_table_set(HashTable *table, char *key, Value *value) {
+void hashtable_set(HashTable *table, char *key, Value *value) {
     if (value == NULL) {
         printf("Attempted to assign null to identifier\n");
     }

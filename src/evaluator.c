@@ -16,13 +16,14 @@ int evaluate(ParseNode *node) {
         callStack = malloc(sizeof(CallStack));
         stack_init(callStack);
 
-        StackFrame main;
-        main.local_variables = hash_table_create(32);
-        stack_push(callStack, &main);
+        StackFrame* main = malloc(sizeof(StackFrame));
+        frame_init(main);
+        stack_push(callStack, main);
     }
     if (node == NULL) {
         return 0;
     }
+
     switch (node->type) {
         case STATEMENT_LIST:
             // Automatically make last statement the return value.
@@ -41,18 +42,18 @@ int evaluate(ParseNode *node) {
             value.type = TYPE_INT; // Assume all ints for now
             value.data.intValue = evaluate(node->right);
 
-            hash_table_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &value);
+            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &value);
             break;
         case FUNCTION:
             Value func_value;
             func_value.type = TYPE_FUNCTION;
             func_value.data.node = node;
 
-            hash_table_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &func_value);
+            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &func_value);
             break;    
         case IDENTIFIER:
             Value id_value;
-            int found = hashtable_get(stack_peek(callStack)->local_variables, node->value.data.stringValue, &id_value);
+            int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
             if (found == 0) {
                 fprintf(stderr, "No identifier found\nName: %s\n", node->value.data.stringValue);
             }
@@ -61,9 +62,8 @@ int evaluate(ParseNode *node) {
                     return id_value.data.intValue;
                 case TYPE_FUNCTION:
                     // Create new stack frame for function call
-                    StackFrame frame;
-                    frame.local_variables = hash_table_create(32);
-                    stack_push(callStack, &frame);
+                    StackFrame* frame = malloc(sizeof(StackFrame));
+                    frame->local_variables = hashtable_create(32);
 
                     // Get the param and arg
                     ParseNode *param = id_value.data.node->left->right;
@@ -74,7 +74,7 @@ int evaluate(ParseNode *node) {
                         Value value;
                         value.type = TYPE_INT;
                         value.data.intValue = evaluate(arg);
-                        hash_table_set(stack_peek(callStack)->local_variables, 
+                        hashtable_set(frame->local_variables, 
                                     param->value.data.stringValue, 
                                     &value);
 
@@ -82,11 +82,15 @@ int evaluate(ParseNode *node) {
                         arg = arg->right;
                     }
 
+                    // Push new variables onto callstack
+                    stack_push(callStack, frame);
+
                     // Evaluate function body
                     int result = evaluate(id_value.data.node->right);
                     
                     // Clean up stack frame
                     stack_pop(callStack);
+
                     return result;
             }
         case LITERAL:
