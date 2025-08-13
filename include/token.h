@@ -9,6 +9,11 @@ typedef enum TokenType {
     OP_SUB,
     OP_MUL,
     OP_DIV,
+
+    OP_GT, OP_GTE,
+    OP_LT, OP_LTE,
+    OP_EQ,
+
     RETURN,
     LITERAL,
     COMMENT,
@@ -19,7 +24,13 @@ typedef enum TokenType {
     // For if statments
     IF,
     THEN,
-    END
+    END,
+
+    PAREN_L,
+    PAREN_R,
+
+    FUNCTION,
+    ARG
 } TokenType;
 
 int is_operator(TokenType type);
@@ -28,7 +39,10 @@ typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
+    TYPE_FUNCTION
 } ValueType;
+
+typedef struct ParseNode ParseNode;
 
 typedef struct Value {
     ValueType type;
@@ -36,6 +50,7 @@ typedef struct Value {
         int intValue;
         float floatValue;
         char *stringValue;
+        ParseNode *node;
     } data;
 } Value;
 

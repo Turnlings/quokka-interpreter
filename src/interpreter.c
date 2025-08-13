@@ -74,6 +74,7 @@ void print_ast(ParseNode *node) {
     switch (node->type) {
         case LITERAL:
             printf("NUM: %d", node->value.data.intValue);
+            //print_ast(node->right);
             break;
         case OP_ADD:
         case OP_SUB:
@@ -85,8 +86,20 @@ void print_ast(ParseNode *node) {
             print_ast(node->right);
             printf(")");
             break;
+        case OP_GT:
+        case OP_GTE:
+        case OP_LT:
+        case OP_LTE:
+        case OP_EQ:
+            printf("( COMP OP: %s ", node->value.data.stringValue);
+            print_ast(node->left);
+            printf(",");
+            print_ast(node->right);
+            printf(")");
+            break;
         case IDENTIFIER:
             printf("%s", node->value.data.stringValue);
+            print_ast(node->right);
             break;
         case ASSIGNMENT:
             printf(" = ");
@@ -104,6 +117,12 @@ void print_ast(ParseNode *node) {
             print_ast(node->left);
             printf("THEN ");
             print_ast(node->right);
+        case FUNCTION:
+            printf("FUNC: ");
+            print_ast(node->left);
+            printf(" , ");
+            print_ast(node->right);
+
         default:
             printf("?");
     }

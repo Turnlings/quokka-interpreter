@@ -6,7 +6,7 @@
 
 typedef struct StackFrame {
     ParseNode *return_address;
-    HashTable local_variables;
+    HashTable *local_variables;
 } StackFrame;
 
 typedef struct CallStack {
@@ -15,7 +15,8 @@ typedef struct CallStack {
 } CallStack;
 
 void stack_init(CallStack *stack);
-void stack_push(CallStack *stack, StackFrame frame);
-StackFrame stack_pop(CallStack *stack);
+void stack_push(CallStack *stack, StackFrame *frame);
+StackFrame *stack_pop(CallStack *stack);
+StackFrame *stack_peek(CallStack *stack);
 
 #endif

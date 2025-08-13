@@ -1,5 +1,7 @@
-a = 3 * 7;
-var_b = 14 - 2;
-c = 0;
-1 ? c = a + var_b;
-c;
+mul a b => a * b;
+
+mul 2 3;
+
+a = 1;
+b = 2;
+a + b;

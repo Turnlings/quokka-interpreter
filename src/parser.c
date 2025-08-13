@@ -64,8 +64,15 @@ ParseNode *parse_expression(Token *tokens, int count) {
         // Conditional
     for (int i = 0; i < count; i++) {
         switch (tokens[i].category) {
+            ParseNode *node;
+            case FUNCTION:
+                node = parse_node_create(FUNCTION);
+                node->value.data.stringValue = strdup(tokens[i].text);
+                node->left = parse_expression(tokens, i);
+                node->right = parse_expression(tokens + i + 1, count - i - 1);
+                return node;
             case IF:
-                ParseNode *node = parse_node_create(IF);
+                node = parse_node_create(IF);
                 node->value.data.stringValue = strdup(tokens[i].text);
                 node->left = parse_expression(tokens, i);
                 node->right = parse_expression(tokens + i + 1, count - i - 1);
@@ -92,21 +99,7 @@ ParseNode *parse_expression(Token *tokens, int count) {
 
         if (is_operator(type)) {
             ParseNode *node = NULL;
-
-            switch (type) {
-                case OP_ADD:
-                    node = parse_node_create(OP_ADD);
-                    break;
-                case OP_SUB:
-                    node = parse_node_create(OP_SUB);
-                    break;
-                case OP_MUL:
-                    node = parse_node_create(OP_MUL);
-                    break;
-                case OP_DIV:
-                    node = parse_node_create(OP_DIV);
-                    break;
-            }
+            node = parse_node_create(type);
             node->value.data.stringValue = tokens[i].text;
             node->left = parse_expression(tokens, i);
             node->right = parse_expression(tokens + i + 1, count - i - 1);
@@ -114,7 +107,24 @@ ParseNode *parse_expression(Token *tokens, int count) {
         }
     }
 
-    // If nothing found then expression is invalid
+    // Function call: identifier followed by expressions
+    if (count > 1) {
+        if (tokens[0].category == IDENTIFIER) {
+            ParseNode *node = parse_node_create(IDENTIFIER);
+            node->value.data.stringValue = tokens[0].text;
+            // Parse arguments
+            node->right = parse_expression(tokens + 1, count - 1);
+            return node;
+        }
+        if (tokens[0].category == LITERAL) {
+            ParseNode *node = parse_node_create(LITERAL);
+            node->value.data.intValue = atoi(tokens[0].text);
+            // Chain args
+            node->right = parse_expression(tokens + 1, count - 1);
+            return node;
+        }
+    }
+
     return NULL;
 }
 

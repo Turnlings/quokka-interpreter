@@ -9,10 +9,16 @@ typedef enum {
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,
+
     OP_ADD,
     OP_SUB,
     OP_MUL,
     OP_DIV,
+
+    OP_GT, OP_GTE,
+    OP_LT, OP_LTE,
+    OP_EQ,
+
     RETURN,
     LITERAL,
     COMMENT,
@@ -23,18 +29,29 @@ typedef enum {
     // For if statments
     IF,
     THEN,
-    END
+    END,
+
+    PAREN_L,
+    PAREN_R,
+
+    FUNCTION,
+    ARG
 } TokenType;
 
 int is_operator(TokenType type) {
-    return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV;
+    return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV ||
+           type == OP_GT || type == OP_GTE || type == OP_LT|| type == OP_LTE ||
+           type == OP_EQ;
 }
 
 typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
+    TYPE_FUNCTION
 } ValueType;
+
+typedef struct ParseNode ParseNode;
 
 typedef struct Value {
     ValueType type;
@@ -42,6 +59,7 @@ typedef struct Value {
         int intValue;
         float floatValue;
         char *stringValue;
+        ParseNode *node;
     } data;
 } Value;
 
