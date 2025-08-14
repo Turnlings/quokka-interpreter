@@ -41,7 +41,6 @@ int evaluate(ParseNode *node) {
             Value value;
             value.type = TYPE_INT; // Assume all ints for now
             value.data.intValue = evaluate(node->right);
-
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &value);
             break;
         case FUNCTION:
@@ -55,7 +54,8 @@ int evaluate(ParseNode *node) {
             Value id_value;
             int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
             if (found == 0) {
-                fprintf(stderr, "No identifier found\nName: %s\n", node->value.data.stringValue);
+                fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
+                exit(1);
             }
             switch (id_value.type) {
                 case TYPE_INT:

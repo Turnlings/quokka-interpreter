@@ -1,6 +1,3 @@
-mul a b => a * b;
+foo x y=> x;
 
-double x => mul x 2;
-
-a = 10;
-double a;
+foo 10 (2 + 1);

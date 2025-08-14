@@ -30,7 +30,7 @@ void stack_push(CallStack *stack, StackFrame *frame) {
     if (stack->top + 1 < MAX_FRAMES) {
         stack->frames[++stack->top] = frame;
     } else {
-        fprintf(stderr, "Stack Overflow!!!");
+        fprintf(stderr, "Stack Overflow!!!\n");
         exit(1);
     }
 }
@@ -39,7 +39,7 @@ StackFrame *stack_pop(CallStack *stack) {
     if (stack->top >= 0) {
         return stack->frames[stack->top--];
     } else {
-        fprintf(stderr, "Stack Underflow");
+        fprintf(stderr, "Stack Underflow\n");
         exit(1);
     }
 }
