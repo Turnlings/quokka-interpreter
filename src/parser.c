@@ -49,7 +49,7 @@ ParseNode *parse_expression(Token *tokens, int count) {
     if (count == 1) {
         return base_cases(tokens);
     }
-    printf("Count: %d\n", count);
+    printf("Expression token count: %d\n", count);
 
     // First check if parenthesis
     if (tokens[0].category == PAREN_L) {
@@ -99,9 +99,15 @@ ParseNode *parse_expression(Token *tokens, int count) {
                 node->left = parse_expression(tokens, i);
                 node->right = parse_expression(tokens + i + 1, count - i - 1);
                 return node;
-            case IF:
-                node = parse_node_create(IF);
+            case TERN_IF:
+                node = parse_node_create(TERN_IF);
                 node->value.data.stringValue = strdup(tokens[i].text);
+                node->left = parse_expression(tokens, i);
+                node->right = parse_expression(tokens + i + 1, count - i - 1);
+                return node;
+            case TERN_COLON:
+                // Then first, which points to else
+                node = parse_node_create(TERN_COLON);
                 node->left = parse_expression(tokens, i);
                 node->right = parse_expression(tokens + i + 1, count - i - 1);
                 return node;

@@ -112,18 +112,22 @@ void print_ast(ParseNode *node) {
             print_ast(node->left);
             print_ast(node->right);
             break;
-        case IF:
+        case TERN_IF:
             printf("IF ");
             print_ast(node->left);
             printf("THEN ");
-            print_ast(node->right);
+            print_ast(node->right->left);
+            printf("ELSE");
+            print_ast(node->right->right);
+            break;
         case FUNCTION:
             printf("FUNC: ");
             print_ast(node->left);
             printf(" , ");
             print_ast(node->right);
-
+            break;
         default:
             printf("?");
+            break;
     }
 }

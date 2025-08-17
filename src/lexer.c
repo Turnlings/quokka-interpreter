@@ -36,9 +36,8 @@ Token* tokenize(char *input, int *max_token_count) {
 
             case '=': add_token(match('=') ? OP_EQ : match('>') ? FUNCTION : ASSIGNMENT); break;
             case ';': add_token(SEPERATOR); break;
-            case '?': add_token(IF); break;
-            case '{': add_token(THEN); break;
-            case '}': add_token(END); break;
+            case '?': add_token(TERN_IF); break;
+            case ':': add_token(TERN_COLON); break;
             case '(': add_token(PAREN_L); break;
             case ')': add_token(PAREN_R); break;
             default:

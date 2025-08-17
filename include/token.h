@@ -22,9 +22,8 @@ typedef enum TokenType {
     STATEMENT_LIST,
 
     // For if statments
-    IF,
-    THEN,
-    END,
+    TERN_IF,
+    TERN_COLON,
 
     PAREN_L,
     PAREN_R,
