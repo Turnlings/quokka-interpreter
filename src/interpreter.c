@@ -123,7 +123,7 @@ void print_ast(ParseNode *node) {
         case FUNCTION:
             printf("FUNC: ");
             print_ast(node->left);
-            printf(" , ");
+            printf(" BODY: ");
             print_ast(node->right);
             break;
         default:

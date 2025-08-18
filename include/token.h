@@ -28,7 +28,8 @@ typedef enum TokenType {
     PAREN_L,
     PAREN_R,
 
-    FUNCTION
+    FUNCTION,
+    COMMA
 } TokenType;
 
 int is_operator(TokenType type);

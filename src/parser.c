@@ -5,6 +5,7 @@
 #include "parser.h"
 
 ParseNode *base_cases(Token *tokens);
+ParseNode *parse_args(Token *tokens, int count);
 
 ParseNode* parse_statements(Token* tokens, int count) {
     if (count <= 0) return NULL;
@@ -51,7 +52,48 @@ ParseNode *parse_expression(Token *tokens, int count) {
     }
     printf("Expression token count: %d\n", count);
 
-    // First check if parenthesis
+    // Function call: identifier followed by (args)
+    // Count is > 1 otherwise would have already returned
+    // TODO: there is probably a better way of handling
+    if (tokens[0].category == IDENTIFIER && tokens[1].category == PAREN_L) {
+        ParseNode *node = parse_node_create(IDENTIFIER);
+        node->value.data.stringValue = tokens[0].text;
+
+        // find matching ')'
+        int depth = 1;
+        int i;
+        for (i = 2; i < count; i++) {
+            if (tokens[i].category == PAREN_L) depth++;
+            else if (tokens[i].category == PAREN_R) {
+                depth--;
+                if (depth == 0) break;  // found the matching one
+            }
+        }
+
+        if (depth != 0) {
+            fprintf(stderr, "Unmatched parenthesis in function call\n");
+            return NULL;
+        }
+
+        // parse args between ( and )
+        int args_len = i - 2;
+        if (args_len > 0) {
+            node->right = parse_args(tokens + 2, args_len);
+        } else {
+            node->right = NULL; // no args
+        }
+
+        // if there's more stuff after the function call, parse it too
+        if (i + 1 < count) {
+            ParseNode *parent = parse_expression(tokens + i + 1, count - (i + 1));
+            parent->left = node;
+            return parent;
+        }
+
+        return node;
+    }
+
+    // Next if parenthesis parse insides
     if (tokens[0].category == PAREN_L) {
         printf("HERE1\n");
         int depth = 1;
@@ -114,17 +156,6 @@ ParseNode *parse_expression(Token *tokens, int count) {
         }
     }
 
-    // Function call: identifier followed by expressions
-    // Count is > 1 otherwise would have already returned
-    // TODO: there is probably a better way of handling
-    if (tokens[0].category == IDENTIFIER) {
-        ParseNode *node = parse_node_create(IDENTIFIER);
-        node->value.data.stringValue = tokens[0].text;
-        // Parse arguments
-        node->right = parse_expression(tokens + 1, count - 1);
-        return node;
-    }
-
     for (int i = 0; i < count; i++) {
         TokenType type = tokens[i].category;
 
@@ -136,15 +167,6 @@ ParseNode *parse_expression(Token *tokens, int count) {
             node->right = parse_expression(tokens + i + 1, count - i - 1);
             return node;
         }
-    }
-
-    // For function args
-    if (tokens[0].category == LITERAL) {
-        ParseNode *node = parse_node_create(LITERAL);
-        node->value.data.intValue = atoi(tokens[0].text);
-        // Chain args
-        node->right = parse_expression(tokens + 1, count - 1);
-        return node;
     }
 
     return NULL;
@@ -173,4 +195,52 @@ ParseNode *base_cases(Token *tokens) {
     }
 
     return NULL; // Invalid!!!
+}
+
+ParseNode *append_child(ParseNode *parent, ParseNode *child);
+
+ParseNode *parse_args(Token *tokens, int count) {
+    printf("Parsing Args\n");
+
+    if (count < 0) {
+        fprintf(stderr, "Invalid function call args\n");
+        return NULL;
+    }
+
+    ParseNode *root = NULL;
+    int start = 0;
+    int depth = 0;
+
+    for (int i = 0; i < count; i++) {
+        if (tokens[i].category == PAREN_L) depth++;
+        else if (tokens[i].category == PAREN_R) depth--;
+        else if (tokens[i].category == COMMA && depth == 0) {
+            printf("Parsing arg %d (Count: %d)\n", i, i - start);
+            ParseNode *expr = parse_expression(tokens + start, i - start);
+            root = append_child(root, expr);
+            start = i + 1;
+        }
+    }
+
+    // Last args
+    if (start < count) {
+        printf("Parsing Final Arg (Count: %d)\n", count - start);
+        ParseNode *expr = parse_expression(tokens + start, count - start);
+        root = append_child(root, expr);
+    }
+
+    return root;
+}
+
+// Simple list appending to make code cleaner,
+// TODO: build list struct to improve performance
+ParseNode *append_child(ParseNode *parent, ParseNode *child) {
+    if (parent == NULL) return child;  // return new root
+
+    ParseNode *cur = parent;
+    while (cur->right != NULL) {
+        cur = cur->right;
+    }
+    cur->right = child;
+    return parent;
 }

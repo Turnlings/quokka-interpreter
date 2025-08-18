@@ -113,6 +113,8 @@ int execute_function(ParseNode *node, Value *id_value) {
                     param->value.data.stringValue, 
                     &value);
 
+        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value.data.intValue);
+
         param = param->right;
         arg = arg->right;
     }

@@ -40,6 +40,7 @@ Token* tokenize(char *input, int *max_token_count) {
             case ':': add_token(TERN_COLON); break;
             case '(': add_token(PAREN_L); break;
             case ')': add_token(PAREN_R); break;
+            case ',': add_token(COMMA); break;
             default:
                 if (isDigit(c)) {
                     number();

@@ -33,12 +33,13 @@ typedef enum {
     PAREN_L,
     PAREN_R,
 
-    FUNCTION
+    FUNCTION,
+    COMMA
 } TokenType;
 
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV ||
-           type == OP_GT || type == OP_GTE || type == OP_LT|| type == OP_LTE ||
+           type == OP_GT || type == OP_GTE || type == OP_LT || type == OP_LTE ||
            type == OP_EQ;
 }
 
