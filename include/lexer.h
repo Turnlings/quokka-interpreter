@@ -28,4 +28,6 @@ bool isAlphaNumeric(char c);
 // General string manipulation
 char* substring(const char *input, int left, int right);
 
+TokenType check_keyword(const char *str);
+
 #endif

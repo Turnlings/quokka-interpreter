@@ -40,6 +40,8 @@ Token* tokenize(char *input, int *max_token_count) {
             case ':': add_token(TERN_COLON); break;
             case '(': add_token(PAREN_L); break;
             case ')': add_token(PAREN_R); break;
+            case '{': add_token(BRACES_L); break;
+            case '}': add_token(BRACES_R); break;
             case ',': add_token(COMMA); break;
             default:
                 if (isDigit(c)) {
@@ -91,7 +93,9 @@ void number() {
 void identifier() {
     while (isAlphaNumeric(peek())) advance();
 
-    add_token_string(IDENTIFIER, substring(source, start, current - 1));
+    char *text = substring(source, start, current - 1);
+    TokenType type = check_keyword(text);
+    add_token_string(type, text);
 }
 
 bool isDigit(char c) {
@@ -115,4 +119,26 @@ char* substring(const char *input, int left, int right) {
     strncpy(sub, input + left, length);
     sub[length] = '\0';
     return sub;
+}
+
+typedef struct {
+    const char *name;
+    TokenType type;
+} Keyword;
+
+Keyword keywords[] = {
+    {"if", IF},
+    {"else", ELSE},
+    {"while", WHILE},
+    {"do", DO},
+    {NULL, 0}
+};
+
+TokenType check_keyword(const char *str) {
+    for (int i = 0; keywords[i].name != NULL; i++) {
+        if (strcmp(str, keywords[i].name) == 0) {
+            return keywords[i].type;
+        }
+    }
+    return IDENTIFIER;
 }

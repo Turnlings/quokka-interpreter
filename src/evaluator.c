@@ -63,6 +63,10 @@ int evaluate(ParseNode *node) {
                 case TYPE_FUNCTION:
                     return execute_function(node, &id_value);
             }
+        case WHILE:
+            while (evaluate(node->left)) {
+                evaluate(node->right);
+            }
         case LITERAL:
             return node->value.data.intValue;
         case OP_ADD:

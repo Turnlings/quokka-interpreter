@@ -6,6 +6,7 @@
 
 ParseNode *base_cases(Token *tokens);
 ParseNode *parse_args(Token *tokens, int count);
+ParseNode *parse_while(Token *tokens, int count);
 
 ParseNode* parse_statements(Token* tokens, int count) {
     if (count <= 0) return NULL;
@@ -102,13 +103,11 @@ ParseNode *parse_expression(Token *tokens, int count) {
             if (tokens[i].category == PAREN_L) depth++;
             else if (tokens[i].category == PAREN_R) depth--;
             if (depth == 0) {
-                printf("HERE2\n");
                 // Everthing up to i goes in a statement list
                 ParseNode *node = parse_expression(tokens + 1, i - 1);
             
                 // If nothing to the right then can just return
                 if (i == count - 1) {
-
                     return node;
                 }
 
@@ -118,6 +117,11 @@ ParseNode *parse_expression(Token *tokens, int count) {
                 return parent;
             }
         }
+    }
+
+    // Keywords like while
+    if (tokens[0].category == WHILE) {
+        return parse_while(tokens + 1, count - 1);
     }
 
     // Assignment: right-associative, so parse from right to left
@@ -200,8 +204,6 @@ ParseNode *base_cases(Token *tokens) {
 ParseNode *append_child(ParseNode *parent, ParseNode *child);
 
 ParseNode *parse_args(Token *tokens, int count) {
-    printf("Parsing Args\n");
-
     if (count < 0) {
         fprintf(stderr, "Invalid function call args\n");
         return NULL;
@@ -215,7 +217,6 @@ ParseNode *parse_args(Token *tokens, int count) {
         if (tokens[i].category == PAREN_L) depth++;
         else if (tokens[i].category == PAREN_R) depth--;
         else if (tokens[i].category == COMMA && depth == 0) {
-            printf("Parsing arg %d (Count: %d)\n", i, i - start);
             ParseNode *expr = parse_expression(tokens + start, i - start);
             root = append_child(root, expr);
             start = i + 1;
@@ -224,12 +225,23 @@ ParseNode *parse_args(Token *tokens, int count) {
 
     // Last args
     if (start < count) {
-        printf("Parsing Final Arg (Count: %d)\n", count - start);
         ParseNode *expr = parse_expression(tokens + start, count - start);
         root = append_child(root, expr);
     }
 
     return root;
+}
+
+ParseNode *parse_while(Token *tokens, int count) {
+    for (int i = 0; i < count; i++) {
+        if (tokens[i].category == DO) {
+            ParseNode *node = parse_node_create(WHILE);
+            node->left = parse_expression(tokens, i);
+            node->right = parse_expression(tokens + i + 1, count - i - 1);
+            return node;
+        }
+    }
+    // TODO: add proper error message
 }
 
 // Simple list appending to make code cleaner,

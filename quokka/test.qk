@@ -1,4 +1,5 @@
-foo(a,b) => b > a ? b : foo(a, b+1);
+a = 2;
 
+while a < 10 do a = a + 1;
 
-foo(5, 2);
+a;

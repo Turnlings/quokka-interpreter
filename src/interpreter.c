@@ -126,6 +126,12 @@ void print_ast(ParseNode *node) {
             printf(" BODY: ");
             print_ast(node->right);
             break;
+        case WHILE:
+            printf("WHILE: ");
+            print_ast(node->left);
+            printf(" DO: ");
+            print_ast(node->right);
+            break;
         default:
             printf("?");
             break;
