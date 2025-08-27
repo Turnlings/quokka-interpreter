@@ -88,10 +88,13 @@ int evaluate(ParseNode *node) {
         case OP_EQ:
             return evaluate(node->left) == evaluate(node->right);
         case TERN_IF:
+        case IF:
             if ( evaluate(node->left) ) { 
                 return evaluate(node->right->left); 
-            } else {
+            } else if (node->right->right != NULL){
                 return evaluate(node->right->right);
+            } else {
+                return 0;
             }
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
