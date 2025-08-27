@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include "token.h"
 
+ParseNode *parse_expression();
+
 Token* input_tokens;
 int position;
 Token current_t;
@@ -63,6 +65,17 @@ ParseNode *parse_term() {
     return parse_literal();
 }
 
+ParseNode *parse_while() {
+    expect(WHILE);
+    ParseNode *condition = parse_expression();
+    expect(DO);
+    ParseNode *body = parse_expression();
+    ParseNode *node = parse_node_create(WHILE);
+    node->left = condition;
+    node->right = body;
+    return node;
+}
+
 ParseNode *parse_assignment() {
     if (match(ASSIGNMENT)) {
         ParseNode *node = parse_node_create(ASSIGNMENT);
@@ -85,7 +98,9 @@ ParseNode *parse_operator() {
 }
 
 ParseNode *parse_expression() {
-    if (peek().category == ASSIGNMENT) {
+    if (match(WHILE)) {
+        return parse_while();
+    } else if (peek().category == ASSIGNMENT) {
         ParseNode* left = parse_term();
         ParseNode* assignment = parse_assignment();
         ParseNode* right = parse_expression();
@@ -97,7 +112,7 @@ ParseNode *parse_expression() {
     } else if (is_operator(peek().category)) { // Operator
         ParseNode* left = parse_term();
         ParseNode* operator = parse_operator();
-        ParseNode* right = parse_term();
+        ParseNode* right = parse_expression();
 
         operator->left = left;
         operator->right = right;
@@ -108,11 +123,41 @@ ParseNode *parse_expression() {
     }
 }
 
+ParseNode *add_child(ParseNode *parent, ParseNode *child) {
+    if (parent == NULL) return child;  // return new root
+
+    ParseNode *cur = parent;
+    while (cur->right != NULL) {
+        cur = cur->right;
+    }
+    cur->right = child;
+    return parent;
+}
+
+ParseNode *parse_program() {
+    ParseNode *root = parse_node_create(STATEMENT_LIST);
+
+    while (position < count) {
+        ParseNode *node = parse_node_create(STATEMENT_LIST);
+        ParseNode *expr = parse_expression();
+        node->left = expr;
+        add_child(root, node);
+
+        if (current_t.category == SEPERATOR) {
+            advance();
+        } else {
+            syntax_error("Missing semi-colon");
+        }
+    }
+
+    return root;
+}
+
 ParseNode *parse(Token *input, int size) {
     input_tokens = input;
     count = size;
     position = 0;
     current_t = input_tokens[position];
 
-    return parse_expression();
+    return parse_program();
 }
