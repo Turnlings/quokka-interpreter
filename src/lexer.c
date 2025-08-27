@@ -8,6 +8,7 @@
 #include "lexer.h"
 
 static char advance();
+static char peek();
 static bool match(char c);
 
 int start = 0, current = 0;
@@ -32,7 +33,14 @@ Token* tokenize(char *input, int *max_token_count) {
             case '+': add_token(OP_ADD); break;
             case '-': add_token(OP_SUB); break;
             case '*': add_token(OP_MUL); break;
-            case '/': add_token(OP_DIV); break;
+            case '/':     
+                if (match('/')) {
+                    // Just ignore whole line of comment
+                    while (peek() != '\n' && peek() != '\0') advance();
+                } else {
+                    add_token(OP_DIV);
+                } 
+                break;
 
             case '>': add_token(match('=') ? OP_GTE : OP_GT); break;
             case '<': add_token(match('=') ? OP_LTE : OP_LT); break;

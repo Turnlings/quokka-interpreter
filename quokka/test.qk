@@ -1,0 +1,19 @@
+// Foo is a function that does stuff
+def foo(a, b) => {
+    c = a + b;
+
+    // This doubles
+    def double(x) => {
+        x * 2;
+    }
+
+    double(c);
+}
+
+foo(2, 3);
+
+a = if 1 < 2 {
+    3;
+}
+
+a;
