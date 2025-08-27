@@ -37,7 +37,7 @@ int main() {
         write_file("transpiled.c", c_code);
 
         // Parsing
-        ParseNode *ast = parse_statements(tokens, token_count);
+        ParseNode *ast = parse(tokens, token_count);
         if (ast == NULL) {
             fprintf(stderr, "Parsing failed\n");
         }

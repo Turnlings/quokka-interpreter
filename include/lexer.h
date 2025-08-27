@@ -11,11 +11,6 @@ Token* tokenize(char *input, int *token_count);
 void add_token(TokenType type);
 void add_token_string(TokenType type, char *text);
 
-// Character reading
-char advance(void);
-bool match(char c);
-char peek(void);
-
 // Token scanners
 void number(void);
 void identifier(void);

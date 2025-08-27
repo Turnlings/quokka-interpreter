@@ -7,6 +7,9 @@
 #include "token.h"
 #include "lexer.h"
 
+static char advance();
+static bool match(char c);
+
 int start = 0, current = 0;
 
 Token *tokens;
@@ -57,7 +60,7 @@ Token* tokenize(char *input, int *max_token_count) {
     return tokens;
 }
 
-char peek() {
+static char peek() {
     return source[current];
 }
 
@@ -73,11 +76,11 @@ void add_token_string(TokenType type, char* text) {
     token_count++;
 }
 
-char advance() {
+static char advance() {
     return source[current++];
 }
 
-bool match(char c) {
+static bool match(char c) {
     if (c != source[current]) { return false; }
 
     current++;
