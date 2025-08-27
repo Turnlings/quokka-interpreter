@@ -4,6 +4,7 @@
 #include "token.h"
 
 ParseNode *parse_expression();
+ParseNode *add_child(ParseNode *parent, ParseNode *child);
 
 Token* input_tokens;
 int position;
@@ -34,14 +35,33 @@ static bool match(TokenType match) {
     return current_t.category == match;
 }
 
+ParseNode *parse_args() {
+    ParseNode* root = NULL;
+    expect(PAREN_L);
+    while (!match(PAREN_R)) {
+        ParseNode* node = parse_expression();
+        root = add_child(root, node);
+        if (match(COMMA)) {
+            advance();
+        }
+    }
+    advance();
+    return root;
+}
+
 ParseNode *parse_identifier() {
     if (match(IDENTIFIER)) {
         ParseNode *node = parse_node_create(IDENTIFIER);
         node->value.data.stringValue = current_t.text;
         advance();
+
+        if (match(PAREN_L)) {
+            ParseNode *args = parse_args();
+            node->right = args;
+        }
         return node;
     } else {
-        syntax_error("Expected Literal");
+        syntax_error("Expected Idnetifier");
         return NULL;
     }
 }
@@ -141,7 +161,7 @@ ParseNode *parse_program() {
         ParseNode *node = parse_node_create(STATEMENT_LIST);
         ParseNode *expr = parse_expression();
         node->left = expr;
-        add_child(root, node);
+        root = add_child(root, node);
 
         if (current_t.category == SEPERATOR) {
             advance();
