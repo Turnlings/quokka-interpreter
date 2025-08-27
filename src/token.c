@@ -37,6 +37,7 @@ typedef enum {
     BRACES_R,
     BLOCK,
 
+    DEF,
     FUNCTION,
     COMMA,
 

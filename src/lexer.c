@@ -134,6 +134,7 @@ Keyword keywords[] = {
     {"else", ELSE},
     {"while", WHILE},
     {"do", DO},
+    {"def", DEF},
     {NULL, 0}
 };
 

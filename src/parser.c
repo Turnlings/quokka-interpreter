@@ -96,6 +96,18 @@ ParseNode *parse_while() {
     return node;
 }
 
+ParseNode *parse_function_defintion() {
+    expect(DEF);
+    ParseNode *identifier = parse_expression();
+    expect(FUNCTION);
+    ParseNode *body = parse_expression();
+
+    ParseNode *node = parse_node_create(FUNCTION);
+    node->left = identifier;
+    node->right = body;
+    return node;
+}
+
 ParseNode *parse_assignment() {
     if (match(ASSIGNMENT)) {
         ParseNode *node = parse_node_create(ASSIGNMENT);
@@ -118,7 +130,9 @@ ParseNode *parse_operator() {
 }
 
 ParseNode *parse_expression() {
-    if (match(WHILE)) {
+    if (match(DEF)) {
+        return parse_function_defintion();
+    } else if (match(WHILE)) {
         return parse_while();
     } else if (peek().category == ASSIGNMENT) {
         ParseNode* left = parse_term();
