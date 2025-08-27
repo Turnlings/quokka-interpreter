@@ -97,6 +97,29 @@ ParseNode *parse_while() {
     return node;
 }
 
+ParseNode *parse_if() {
+    expect(IF);
+    ParseNode *condition = parse_expression();
+    expect(DO);
+    ParseNode *body = parse_block();
+    ParseNode *else_block = NULL;
+
+    if (match(ELSE)) {
+        expect(ELSE);
+        else_block = parse_block();
+    }
+
+    ParseNode *options = parse_node_create(DO);
+    options->left = body;
+    options->right = else_block;
+
+    ParseNode *if_statement = parse_node_create(IF);
+    if_statement->left = condition;
+    if_statement->right = options;
+
+    return if_statement;
+}
+
 ParseNode *parse_function_defintion() {
     expect(DEF);
     ParseNode *identifier = parse_expression();
@@ -135,6 +158,8 @@ ParseNode *parse_expression() {
         return parse_function_defintion();
     } else if (match(WHILE)) {
         return parse_while();
+    } else if (match(IF)) {
+        return parse_if();
     } else if (peek().category == ASSIGNMENT) {
         ParseNode* left = parse_term();
         ParseNode* assignment = parse_assignment();

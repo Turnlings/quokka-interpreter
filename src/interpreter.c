@@ -113,6 +113,7 @@ void print_ast(ParseNode *node) {
             print_ast(node->right);
             break;
         case TERN_IF:
+        case IF:
             printf("IF ");
             print_ast(node->left);
             printf("THEN ");
