@@ -4,6 +4,7 @@
 #include "token.h"
 
 ParseNode *parse_expression();
+ParseNode *parse_block();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 
 Token* input_tokens;
@@ -89,7 +90,7 @@ ParseNode *parse_while() {
     expect(WHILE);
     ParseNode *condition = parse_expression();
     expect(DO);
-    ParseNode *body = parse_expression();
+    ParseNode *body = parse_block();
     ParseNode *node = parse_node_create(WHILE);
     node->left = condition;
     node->right = body;
@@ -100,7 +101,7 @@ ParseNode *parse_function_defintion() {
     expect(DEF);
     ParseNode *identifier = parse_expression();
     expect(FUNCTION);
-    ParseNode *body = parse_expression();
+    ParseNode *body = parse_block();
 
     ParseNode *node = parse_node_create(FUNCTION);
     node->left = identifier;
@@ -166,6 +167,29 @@ ParseNode *add_child(ParseNode *parent, ParseNode *child) {
     }
     cur->right = child;
     return parent;
+}
+
+ParseNode *parse_block() {
+    if(match(BRACES_L)) { // TODO: can this replace parts of parse_program?
+        expect(BRACES_L);
+        ParseNode *root = parse_node_create(STATEMENT_LIST);
+        while (!match(BRACES_R)) {
+            ParseNode *node = parse_node_create(STATEMENT_LIST);
+            ParseNode *expr = parse_expression();
+            node->left = expr;
+            root = add_child(root, node);
+
+            if (match(SEPERATOR)) {
+                advance();
+            } else {
+                syntax_error("Missing semi-colon");
+            }
+        }
+        advance();
+        return root;
+    } else {
+        return parse_expression();
+    }
 }
 
 ParseNode *parse_program() {
