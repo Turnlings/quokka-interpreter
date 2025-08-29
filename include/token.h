@@ -16,6 +16,7 @@ typedef enum TokenType {
 
     RETURN,
     LITERAL,
+    STRING,
     COMMENT,
     WHITESPACE,
     ASSIGNMENT,

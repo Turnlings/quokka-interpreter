@@ -54,6 +54,7 @@ Token* tokenize(char *input, int *max_token_count) {
             case '{': add_token(BRACES_L); break;
             case '}': add_token(BRACES_R); break;
             case ',': add_token(COMMA); break;
+            case '"': string(); break;
             default:
                 if (isDigit(c)) {
                     number();
@@ -107,6 +108,14 @@ void identifier() {
     char *text = substring(source, start, current - 1);
     TokenType type = check_keyword(text);
     add_token_string(type, text);
+}
+
+void string() {
+    while (peek()!='"') advance();
+
+    char *text = substring(source, start + 1, current - 1);
+    add_token_string(STRING, text);
+    advance();
 }
 
 bool isDigit(char c) {

@@ -14,6 +14,7 @@ void add_token_string(TokenType type, char *text);
 // Token scanners
 void number(void);
 void identifier(void);
+void string(void);
 
 // Character classification
 bool isDigit(char c);

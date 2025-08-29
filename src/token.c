@@ -21,6 +21,7 @@ typedef enum {
 
     RETURN,
     LITERAL,
+    STRING,
     COMMENT,
     WHITESPACE,
     ASSIGNMENT,

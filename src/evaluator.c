@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "token.h"
 #include "utils/hash_table.h"
 #include "utils/call_stack.h"
 #include "evaluator.h"
+
+#define MAX_STRING_LENGTH 128
 
 void runtime_error(char* string) {
     printf("Runtime Error: %s\n", string);
@@ -17,7 +20,6 @@ CallStack *callStack = NULL;
  * @return The evaluated value
  */
 Value *evaluate(ParseNode *node) {
-    printf("EVALUATION\nNODE: %d\n", node->type);
     if (callStack == NULL) {
         callStack = malloc(sizeof(CallStack));
         stack_init(callStack);
@@ -57,7 +59,7 @@ Value *evaluate(ParseNode *node) {
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &func_value);
             break;    
         case IDENTIFIER:
-            Value *id_value;
+            Value *id_value = malloc(sizeof(Value));
             int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
             if (found == 0) {
                 fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
@@ -79,15 +81,23 @@ Value *evaluate(ParseNode *node) {
             Value *left_a = evaluate(node->left);
             Value *right_a = evaluate(node->right);
             Value *result_a = malloc(sizeof(Value));
-            printf("A\n");
             if (left_a->type == TYPE_INT && right_a->type == TYPE_INT) {
-                printf("B\n");
                 result_a->type = TYPE_INT;
-                printf("C\n");
                 result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
             }
             else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
-                // TODO:
+                result_a->type = TYPE_STRING;
+                unsigned int len_left = strlen(left_a->data.stringValue);
+                unsigned int len_right = strlen(right_a->data.stringValue);
+                char *concat = malloc(len_left + len_left + 1);  // +1 for '\0'
+                if (!concat) {
+                    runtime_error("Malloc Failed");
+                    exit(1);
+                }
+                strcpy(concat, left_a->data.stringValue);
+                strcat(concat, right_a->data.stringValue);
+                
+                result_a->data.stringValue = concat;
             } 
             else {
                 runtime_error("Incompatible types for OP_ADD");

@@ -74,6 +74,12 @@ ParseNode *parse_literal() {
         node->value.data.intValue = atoi(current_t.text);
         advance();
         return node;
+    } else if (match(STRING)) {
+        ParseNode *node = parse_node_create(LITERAL);
+        node->value.type = TYPE_STRING;
+        node->value.data.stringValue = current_t.text;
+        advance();
+        return node;
     } else {
         syntax_error("Expected Literal");
         return NULL;
