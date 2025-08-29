@@ -46,16 +46,17 @@ int main() {
         print_ast(ast);
         printf("\n");
 
-        HashTable *symbolTable = hashtable_create(MAX_SYMBOL_COUNT);
-
-        int return_value = evaluate(ast, symbolTable);
+        Value *return_value = evaluate(ast);
         if (return_value == NULL) {
             fprintf(stderr, "Evaluation failed\n");
         }
 
-        hashtable_destroy(symbolTable);
-
-        printf("Evaluation Return Value: %d\n", return_value);
+        if (return_value->type == TYPE_INT) {
+            printf("Evaluation Return Value: %d\n", return_value->data.intValue);
+        }
+        else if (return_value->type == TYPE_STRING) {
+            printf("Evaluation Return Value: %s\n", return_value->data.stringValue);
+        }
 
         free(tokens);
         free(input);

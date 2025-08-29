@@ -3,6 +3,11 @@
 #include "token.h"
 #include "utils/hash_table.h"
 #include "utils/call_stack.h"
+#include "evaluator.h"
+
+void runtime_error(char* string) {
+    printf("Runtime Error: %s\n", string);
+}
 
 CallStack *callStack = NULL;
 
@@ -11,7 +16,8 @@ CallStack *callStack = NULL;
  * @param node The root node of the AST
  * @return The evaluated value
  */
-int evaluate(ParseNode *node) {
+Value *evaluate(ParseNode *node) {
+    printf("EVALUATION\nNODE: %d\n", node->type);
     if (callStack == NULL) {
         callStack = malloc(sizeof(CallStack));
         stack_init(callStack);
@@ -21,7 +27,7 @@ int evaluate(ParseNode *node) {
         stack_push(callStack, main);
     }
     if (node == NULL) {
-        return 0;
+        return NULL;
     }
 
     switch (node->type) {
@@ -30,18 +36,18 @@ int evaluate(ParseNode *node) {
             if (node->right == NULL) {
                 return evaluate(node->left);
             } else {
-                evaluate(node->left);
+                if (node->left != NULL) {
+                    evaluate(node->left);
+                }
                 return evaluate(node->right);
             }
         case ASSIGNMENT:
             if (!node->left || !node->left->value.data.stringValue) {
                 fprintf(stderr, "Invalid assignment target\n");
-                return 0;
+                return NULL;
             }
-            Value value;
-            value.type = TYPE_INT; // Assume all ints for now
-            value.data.intValue = evaluate(node->right);
-            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &value);
+            Value *value = evaluate(node->right);
+            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
             break;
         case FUNCTION:
             Value func_value;
@@ -51,40 +57,80 @@ int evaluate(ParseNode *node) {
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &func_value);
             break;    
         case IDENTIFIER:
-            Value id_value;
-            int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
+            Value *id_value;
+            int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
             if (found == 0) {
                 fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
                 exit(1);
             }
-            switch (id_value.type) {
-                case TYPE_INT:
-                    return id_value.data.intValue;
+            switch (id_value->type) {
                 case TYPE_FUNCTION:
-                    return execute_function(node, &id_value);
+                    return execute_function(node, id_value);
+                default:
+                    return id_value;
             }
         case WHILE:
             while (evaluate(node->left)) {
                 evaluate(node->right);
             }
         case LITERAL:
-            return node->value.data.intValue;
+            return &node->value;
         case OP_ADD:
-            return evaluate(node->left) + evaluate(node->right);
+            Value *left_a = evaluate(node->left);
+            Value *right_a = evaluate(node->right);
+            Value *result_a = malloc(sizeof(Value));
+            printf("A\n");
+            if (left_a->type == TYPE_INT && right_a->type == TYPE_INT) {
+                printf("B\n");
+                result_a->type = TYPE_INT;
+                printf("C\n");
+                result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
+            }
+            else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
+                // TODO:
+            } 
+            else {
+                runtime_error("Incompatible types for OP_ADD");
+                return NULL;
+            }
+            return result_a;
         case OP_SUB:
-            return evaluate(node->left) - evaluate(node->right);
         case OP_MUL:
-            return evaluate(node->left) * evaluate(node->right);
         case OP_DIV:
-            return evaluate(node->left) / evaluate(node->right);
         case OP_GT:
-            return evaluate(node->left) > evaluate(node->right);
         case OP_GTE:
-            return evaluate(node->left) >= evaluate(node->right);
         case OP_LT:
-            return evaluate(node->left) < evaluate(node->right);
         case OP_LTE:
-            return evaluate(node->left) <= evaluate(node->right);
+            Value *left = evaluate(node->left);
+            Value *right = evaluate(node->right);
+            Value *result;
+
+            if (left->type == TYPE_INT && right->type == TYPE_INT) {
+                result->type = TYPE_INT;
+
+                switch (node->type) {
+                    case OP_SUB:
+                        result->data.intValue = left->data.intValue - right->data.intValue;
+                    case OP_MUL:
+                        result->data.intValue = left->data.intValue * right->data.intValue;
+                    case OP_DIV:
+                        result->data.intValue = left->data.intValue / right->data.intValue;
+                    case OP_GT:
+                        result->data.intValue = left->data.intValue > right->data.intValue;
+                    case OP_GTE:
+                        result->data.intValue = left->data.intValue >= right->data.intValue;
+                    case OP_LT:
+                        result->data.intValue = left->data.intValue < right->data.intValue;
+                    case OP_LTE:
+                        result->data.intValue = left->data.intValue <= right->data.intValue;
+                }
+
+                return result;
+            }
+            else {
+                runtime_error("Incompatible types for OPERATOR");
+                return NULL;
+            }
         case OP_EQ:
             return evaluate(node->left) == evaluate(node->right);
         case TERN_IF:
@@ -94,7 +140,7 @@ int evaluate(ParseNode *node) {
             } else if (node->right->right != NULL){
                 return evaluate(node->right->right);
             } else {
-                return 0;
+                return NULL;
             }
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
@@ -102,7 +148,7 @@ int evaluate(ParseNode *node) {
     }
 }
 
-int execute_function(ParseNode *node, Value *id_value) {
+Value *execute_function(ParseNode *node, Value *id_value) {
     // Create new stack frame for function call
     StackFrame* frame = malloc(sizeof(StackFrame));
     frame->local_variables = hashtable_create(32);
@@ -113,14 +159,12 @@ int execute_function(ParseNode *node, Value *id_value) {
 
     // Bind parameter to argument
     while (param && arg) {
-        Value value;
-        value.type = TYPE_INT;
-        value.data.intValue = evaluate(arg);
+        Value *value = evaluate(arg);
         hashtable_set(frame->local_variables, 
                     param->value.data.stringValue, 
-                    &value);
+                    value);
 
-        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value.data.intValue);
+        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value->data.intValue);
 
         param = param->right;
         arg = arg->right;
@@ -130,7 +174,7 @@ int execute_function(ParseNode *node, Value *id_value) {
     stack_push(callStack, frame);
 
     // Evaluate function body
-    int result = evaluate(id_value->data.node->right);
+    Value *result = evaluate(id_value->data.node->right);
     
     // Clean up stack frame
     stack_pop(callStack);

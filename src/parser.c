@@ -70,6 +70,7 @@ ParseNode *parse_identifier() {
 ParseNode *parse_literal() {
     if (match(LITERAL)) {
         ParseNode *node = parse_node_create(LITERAL);
+        node->value.type = TYPE_INT;
         node->value.data.intValue = atoi(current_t.text);
         advance();
         return node;
