@@ -49,3 +49,8 @@ def foo(x, y) => {
 
 foo(5, 3); // Returns 12
 ```
+
+### Basic Print Statements
+```c
+>> "Hello World" // Outputs Hello World to the console
+```

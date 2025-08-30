@@ -152,8 +152,21 @@ Value *evaluate(ParseNode *node) {
             } else {
                 return NULL;
             }
+        case OUT:
+            Value *to_out = evaluate(node->left);
+            switch(to_out->type) {
+                case TYPE_INT:
+                    printf("%d\n",to_out->data.intValue);
+                    break;
+                case TYPE_STRING:
+                    printf("%s\n",to_out->data.stringValue);
+                    break;
+                default:
+                    runtime_error("Invalid Output Type");
+            }
+            return to_out;
         default:
-            fprintf(stderr, "Error evaluating Node\nType: %d\n", node->type);
+            fprintf(stderr, "Error evaluating Node\nType: %d\nString Value: %s\n", node->type, node->value.data.stringValue);
             return 0;
     }
 }

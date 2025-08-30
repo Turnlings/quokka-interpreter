@@ -40,7 +40,10 @@ typedef enum TokenType {
     IF,
     ELSE,
     WHILE,
-    DO
+    DO,
+
+    IN,
+    OUT
 } TokenType;
 
 int is_operator(TokenType type);

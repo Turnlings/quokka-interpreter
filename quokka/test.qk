@@ -1,3 +1,9 @@
 def hello(str) => "hello " + str;
 
-hello("world");
+person = "world";
+
+>> hello(person);
+
+person = person + "a";
+
+hello(person);

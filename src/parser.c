@@ -160,6 +160,14 @@ ParseNode *parse_operator() {
     }
 }
 
+ParseNode *parse_out() {
+    expect(OUT);
+    ParseNode *node = parse_node_create(OUT);
+    ParseNode* left = parse_expression();
+    node->left = left;
+    return node;
+}
+
 ParseNode *parse_expression() {
     if (match(DEF)) {
         return parse_function_defintion();
@@ -176,6 +184,8 @@ ParseNode *parse_expression() {
         assignment->right = right;
 
         return assignment;
+    } else if (match(OUT)) {
+        return parse_out();
     } else if (is_operator(peek().category)) { // Operator
         ParseNode* left = parse_term();
         ParseNode* operator = parse_operator();
