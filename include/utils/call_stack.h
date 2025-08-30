@@ -14,7 +14,9 @@ typedef struct CallStack {
     int top;
 } CallStack;
 
-void frame_init(StackFrame *frame);
+StackFrame* frame_create();
+void frame_destroy(StackFrame *frame);
+
 void stack_init(CallStack *stack);
 void stack_push(CallStack *stack, StackFrame *frame);
 StackFrame *stack_pop(CallStack *stack);

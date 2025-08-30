@@ -15,10 +15,18 @@ typedef struct CallStack {
     int top;
 } CallStack;
 
-void frame_init(StackFrame *frame) {
+StackFrame* frame_create() {
+    StackFrame* frame = malloc(sizeof(StackFrame));
+    if (!frame) return NULL;
     frame->return_address = NULL;
     frame->local_variables = hashtable_create(32);
+    return frame;
 } 
+
+void frame_destroy(StackFrame *frame) {
+    hashtable_destroy(frame->local_variables);
+    free(frame);
+}
 
 void stack_init(CallStack *stack) {
     stack->frames = malloc(sizeof(StackFrame*) * MAX_FRAMES);

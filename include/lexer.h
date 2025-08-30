@@ -26,4 +26,6 @@ char* substring(const char *input, int left, int right);
 
 TokenType check_keyword(const char *str);
 
+void free_tokens(Token *tokens, int count);
+
 #endif

@@ -163,3 +163,12 @@ TokenType check_keyword(const char *str) {
     }
     return IDENTIFIER;
 }
+
+void free_tokens(Token *tokens, int count) {
+    for (int i = 0; i < count; i++) {
+        if (tokens[i].text) {
+            free(tokens[i].text);
+        }
+    }
+    free(tokens);
+}

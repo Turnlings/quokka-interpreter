@@ -24,8 +24,7 @@ Value *evaluate(ParseNode *node) {
         callStack = malloc(sizeof(CallStack));
         stack_init(callStack);
 
-        StackFrame* main = malloc(sizeof(StackFrame));
-        frame_init(main);
+        StackFrame* main = frame_create();
         stack_push(callStack, main);
     }
     if (node == NULL) {
@@ -173,8 +172,7 @@ Value *evaluate(ParseNode *node) {
 
 Value *execute_function(ParseNode *node, Value *id_value) {
     // Create new stack frame for function call
-    StackFrame* frame = malloc(sizeof(StackFrame));
-    frame->local_variables = hashtable_create(32);
+    StackFrame* frame = frame_create();
 
     // Get the param and arg
     ParseNode *param = id_value->data.node->left->right;
@@ -200,7 +198,8 @@ Value *execute_function(ParseNode *node, Value *id_value) {
     Value *result = evaluate(id_value->data.node->right);
     
     // Clean up stack frame
-    stack_pop(callStack);
+    frame = stack_pop(callStack);
+    frame_destroy(frame);
 
     return result;
 }

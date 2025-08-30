@@ -57,8 +57,7 @@ int main() {
         else if (return_value->type == TYPE_STRING) {
             printf("Evaluation Return Value: %s\n", return_value->data.stringValue);
         }
-
-        free(tokens);
+        free_tokens(tokens, token_count);
         free(input);
         free(c_code);
         free(ast);
