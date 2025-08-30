@@ -43,7 +43,7 @@ Token* tokenize(char *input, int *max_token_count) {
                 break;
 
             case '>': add_token(match('=') ? OP_GTE : match('>') ? OUT : OP_GT); break;
-            case '<': add_token(match('=') ? OP_LTE : match('<') ? IN :OP_LT); break;
+            case '<': add_token(match('=') ? OP_LTE : match('<') ? IN : OP_LT); break;
 
             case '=': add_token(match('=') ? OP_EQ : match('>') ? FUNCTION : ASSIGNMENT); break;
             case ';': add_token(SEPERATOR); break;

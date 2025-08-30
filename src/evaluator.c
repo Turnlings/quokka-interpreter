@@ -164,6 +164,28 @@ Value *evaluate(ParseNode *node) {
                     runtime_error("Invalid Output Type");
             }
             return to_out;
+        case IN:
+            char *line = NULL;
+            size_t len = 0;
+            int nread;
+
+            printf("<< "); // Prompt              
+            nread = getline(&line, &len, stdin);
+
+            if (nread == -1) {
+                runtime_error("Failed to read value");
+            }
+
+            // Remove the newline character
+            if (line[nread - 1] == '\n') {
+                line[nread - 1] = '\0';
+                nread--;
+            }
+
+            Value *in = malloc(sizeof(Value));
+            in->type = TYPE_STRING;
+            in->data.stringValue = line;
+            return in;
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\nString Value: %s\n", node->type, node->value.data.stringValue);
             return 0;
