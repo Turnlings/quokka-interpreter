@@ -1,2 +1,17 @@
 
->> "Hello " + <<;
+class Apple() {
+    a = 3;
+    b = 0;
+
+    def doubleA() => {
+        set b = a * 2;
+    };
+};
+
+apple = Apple();
+
+apple.a;
+
+apple.doubleA();
+
+apple.b;

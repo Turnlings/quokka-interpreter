@@ -1,6 +1,8 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+typedef struct HashTable HashTable;
+
 typedef enum TokenType {
     IDENTIFIER,
     KEYWORD,
@@ -47,7 +49,8 @@ typedef enum TokenType {
     IN,
     OUT,
     
-    CLASS
+    CLASS,
+    SET
 } TokenType;
 
 int is_operator(TokenType type);
@@ -70,6 +73,7 @@ typedef struct Value {
         float floatValue;
         char *stringValue;
         ParseNode *node;
+        HashTable *object_fields;
     } data;
 } Value;
 

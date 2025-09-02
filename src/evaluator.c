@@ -49,7 +49,20 @@ Value *evaluate(ParseNode *node) {
             }
             Value *value = evaluate(node->right);
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
-            break;
+            return value;
+        case SET: // Like self.identifier
+            Value *rhs = evaluate(node->right);
+
+            // Get the object
+            Value *object = malloc(sizeof(Value));
+            int found_object = stack_get_value(callStack, "self", object);
+            if (found_object == 0) {
+                runtime_error("Set used but no class to reference");
+                exit(1);
+            }
+
+            hashtable_set(object->data.object_fields, node->left->value.data.stringValue, rhs);
+            return rhs;
         case CLASS:
             Value *class_value = malloc(sizeof(Value));
             class_value->type = TYPE_CLASS;
@@ -58,12 +71,13 @@ Value *evaluate(ParseNode *node) {
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, class_value);
             break;
         case FUNCTION:
-            Value func_value;
-            func_value.type = TYPE_FUNCTION;
-            func_value.data.node = node;
-
-            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, &func_value);
-            break;    
+            Value *func_value = malloc(sizeof(Value));
+            func_value->type = TYPE_FUNCTION;
+            func_value->data.node = node;
+            hashtable_set(stack_peek(callStack)->local_variables,
+                        node->left->value.data.stringValue,
+                        func_value);
+            break;  
         case IDENTIFIER:
             Value *id_value = malloc(sizeof(Value));
             int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
@@ -74,6 +88,8 @@ Value *evaluate(ParseNode *node) {
             switch (id_value->type) {
                 case TYPE_FUNCTION:
                     return execute_function(node, id_value);
+                case TYPE_CLASS:
+                    return build_object(node, id_value);
                 default:
                     return id_value;
             }
@@ -95,7 +111,7 @@ Value *evaluate(ParseNode *node) {
                 result_a->type = TYPE_STRING;
                 unsigned int len_left = strlen(left_a->data.stringValue);
                 unsigned int len_right = strlen(right_a->data.stringValue);
-                char *concat = malloc(len_left + len_left + 1);  // +1 for '\0'
+                char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
                 if (!concat) {
                     runtime_error("Malloc Failed");
                     exit(1);
@@ -119,26 +135,26 @@ Value *evaluate(ParseNode *node) {
         case OP_LTE:
             Value *left = evaluate(node->left);
             Value *right = evaluate(node->right);
-            Value *result;
+            Value *result = malloc(sizeof(Value));
 
             if (left->type == TYPE_INT && right->type == TYPE_INT) {
                 result->type = TYPE_INT;
 
                 switch (node->type) {
                     case OP_SUB:
-                        result->data.intValue = left->data.intValue - right->data.intValue;
+                        result->data.intValue = left->data.intValue - right->data.intValue; break;
                     case OP_MUL:
-                        result->data.intValue = left->data.intValue * right->data.intValue;
+                        result->data.intValue = left->data.intValue * right->data.intValue; break;
                     case OP_DIV:
-                        result->data.intValue = left->data.intValue / right->data.intValue;
+                        result->data.intValue = left->data.intValue / right->data.intValue; break;
                     case OP_GT:
-                        result->data.intValue = left->data.intValue > right->data.intValue;
+                        result->data.intValue = left->data.intValue > right->data.intValue; break;
                     case OP_GTE:
-                        result->data.intValue = left->data.intValue >= right->data.intValue;
+                        result->data.intValue = left->data.intValue >= right->data.intValue; break;
                     case OP_LT:
-                        result->data.intValue = left->data.intValue < right->data.intValue;
+                        result->data.intValue = left->data.intValue < right->data.intValue; break;
                     case OP_LTE:
-                        result->data.intValue = left->data.intValue <= right->data.intValue;
+                        result->data.intValue = left->data.intValue <= right->data.intValue; break;
                 }
 
                 return result;
@@ -148,7 +164,12 @@ Value *evaluate(ParseNode *node) {
                 return NULL;
             }
         case OP_EQ:
-            return evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
+            Value *eq = malloc(sizeof(Value));
+            eq->type = TYPE_INT;
+            eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
+            return eq;
+        case OP_DOT:
+            return call_object(node);
         case TERN_IF:
         case IF:
             if ( evaluate(node->left)->data.intValue == 1 ) { 
@@ -228,7 +249,80 @@ Value *execute_function(ParseNode *node, Value *id_value) {
     
     // Clean up stack frame
     frame = stack_pop(callStack);
-    frame_destroy(frame);
+    frame_destroy(frame, 1);
 
     return result;
+}
+
+Value *build_object(ParseNode *node, Value *class) {
+    
+    HashTable *local_variables = hashtable_create(128); // TODO: make bucket size not literal
+
+    // Get the param and arg
+    ParseNode *param = class->data.node->left->right;
+    ParseNode *arg = node->right;
+
+    // Bind parameter to argument
+    while (param && arg) {
+        Value *value = evaluate(arg);
+        hashtable_set(local_variables, 
+                    param->value.data.stringValue, 
+                    value);
+
+        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value->data.intValue);
+
+        param = param->right;
+        arg = arg->right;
+    }
+
+    // Create a frame that will be auto filled with the object fields
+    StackFrame *frame = frame_create();
+    frame->local_variables = local_variables;
+
+    stack_push(callStack, frame);
+    Value *body = evaluate(class->data.node->right);
+    StackFrame *fields_stack = stack_pop(callStack);
+
+    Value *obj = malloc(sizeof(Value));
+    obj->type = TYPE_OBJECT;
+    obj->data.object_fields = fields_stack->local_variables;
+
+    hashtable_set(local_variables, "self", obj);
+
+    printf("Object built\n");
+    return obj;
+}
+
+Value *call_object(ParseNode *node) {
+    printf("Object called\n");
+
+    Value *obj = evaluate(node->left);
+    if (!obj || obj->type != TYPE_OBJECT) {
+        runtime_error("Dot operator on non-object");
+        return NULL;
+    }
+
+    // Look up field/method in object's hash table
+    Value *member = malloc(sizeof(Value));
+    int found = hashtable_get(obj->data.object_fields, node->right->value.data.stringValue, member);
+    if (!found) {
+        fprintf(stderr, "Object has no member '%s'\n", node->right->value.data.stringValue);
+        return NULL;
+    }
+
+    switch (member->type) {
+        case TYPE_FUNCTION:
+            StackFrame* frame = frame_create();
+            frame->local_variables = obj->data.object_fields;
+            stack_push(callStack, frame);
+
+            Value *result = execute_function(node->right, member);
+
+            frame = stack_pop(callStack);
+            frame_destroy(frame, 0);
+
+            return result;
+        default:
+            return member;
+    }
 }

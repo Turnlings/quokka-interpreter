@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "utils/hash_table.h"
 #include "token.h"
 
@@ -23,8 +24,10 @@ StackFrame* frame_create() {
     return frame;
 } 
 
-void frame_destroy(StackFrame *frame) {
-    hashtable_destroy(frame->local_variables);
+void frame_destroy(StackFrame *frame, bool destroy_hashtable) {
+    if (destroy_hashtable) {
+        hashtable_destroy(frame->local_variables);
+    }
     free(frame);
 }
 

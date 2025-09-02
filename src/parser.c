@@ -189,6 +189,17 @@ ParseNode *parse_expression() {
         return parse_function_definition();
     } else if (match(CLASS)) {
         return parse_class_definition();
+    } else if (match(SET)) {
+        expect(SET);
+        ParseNode* left = parse_term();
+        expect(ASSIGNMENT);
+        ParseNode* right = parse_expression();
+
+        ParseNode* set = parse_node_create(SET);
+        set->left = left;
+        set->right = right;
+
+        return set;
     } else if (match(WHILE)) {
         return parse_while();
     }else if (match(IF)) {

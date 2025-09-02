@@ -80,6 +80,7 @@ void print_ast(ParseNode *node) {
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
+        case OP_DOT:
             printf("(%s", node->value.data.stringValue);
             print_ast(node->left);
             printf(",");
@@ -136,6 +137,11 @@ void print_ast(ParseNode *node) {
         case OUT:
             printf("OUT: ");
             print_ast(node->left);
+            break;
+        case CLASS:
+            printf("CLASS: ");
+            print_ast(node->left);
+            print_ast(node->right);
             break;
         default:
             printf("?");

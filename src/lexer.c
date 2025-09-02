@@ -46,6 +46,7 @@ Token* tokenize(char *input, int *max_token_count) {
             case '<': add_token(match('=') ? OP_LTE : match('<') ? IN : OP_LT); break;
 
             case '=': add_token(match('=') ? OP_EQ : match('>') ? FUNCTION : ASSIGNMENT); break;
+            case '.': add_token(OP_DOT); break;
             case ';': add_token(SEPERATOR); break;
             case '?': add_token(TERN_IF); break;
             case ':': add_token(TERN_COLON); break;
@@ -153,6 +154,7 @@ Keyword keywords[] = {
     {"do", DO},
     {"def", DEF},
     {"class", CLASS},
+    {"set", SET},
     {NULL, 0}
 };
 

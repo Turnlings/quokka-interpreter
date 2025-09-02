@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+typedef struct HashTable HashTable;
+
 /*
 * The tokens passed from the lexer to the syntax tree
 */
@@ -52,7 +54,8 @@ typedef enum {
     IN,
     OUT,
 
-    CLASS
+    CLASS,
+    SET
 } TokenType;
 
 int is_operator(TokenType type) {
@@ -79,6 +82,7 @@ typedef struct Value {
         float floatValue;
         char *stringValue;
         ParseNode *node;
+        HashTable *object_fields;
     } data;
 } Value;
 
