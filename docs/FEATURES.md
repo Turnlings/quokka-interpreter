@@ -54,3 +54,28 @@ foo(5, 3); // Returns 12
 ```c
 >> "Hello World" // Outputs Hello World to the console
 ```
+
+### Class
+```c
+class Car(colour) {
+    speed = 10; 
+
+    def print_colour => {
+        >> colour;
+    }
+
+    def set_colour(col) => {
+        // Use the set keyword to assign the variable to the objet
+        set colour = col; 
+    }
+}
+
+car = Car("red");
+
+car.print_colour; // red
+
+car.set_colour("blue");
+
+car.print_colour; // blue
+
+```
