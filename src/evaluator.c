@@ -148,10 +148,10 @@ Value *evaluate(ParseNode *node) {
                 return NULL;
             }
         case OP_EQ:
-            return evaluate(node->left) == evaluate(node->right);
+            return evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
         case TERN_IF:
         case IF:
-            if ( evaluate(node->left) ) { 
+            if ( evaluate(node->left)->data.intValue == 1 ) { 
                 return evaluate(node->right->left); 
             } else if (node->right->right != NULL){
                 return evaluate(node->right->right);
