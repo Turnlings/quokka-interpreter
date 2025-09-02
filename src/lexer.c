@@ -152,6 +152,7 @@ Keyword keywords[] = {
     {"while", WHILE},
     {"do", DO},
     {"def", DEF},
+    {"class", CLASS},
     {NULL, 0}
 };
 

@@ -19,6 +19,8 @@ typedef enum {
     OP_LT, OP_LTE,
     OP_EQ,
 
+    OP_DOT,
+
     RETURN,
     LITERAL,
     STRING,
@@ -48,20 +50,24 @@ typedef enum {
     DO,
 
     IN,
-    OUT
+    OUT,
+
+    CLASS
 } TokenType;
 
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV ||
            type == OP_GT || type == OP_GTE || type == OP_LT || type == OP_LTE ||
-           type == OP_EQ;
+           type == OP_EQ || type == OP_DOT;
 }
 
 typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
-    TYPE_FUNCTION
+    TYPE_FUNCTION,
+    TYPE_CLASS,
+    TYPE_OBJECT
 } ValueType;
 
 typedef struct ParseNode ParseNode;

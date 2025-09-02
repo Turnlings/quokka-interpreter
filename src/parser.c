@@ -127,7 +127,18 @@ ParseNode *parse_if() {
     return if_statement;
 }
 
-ParseNode *parse_function_defintion() {
+ParseNode *parse_class_definition() {
+    expect(CLASS);
+    ParseNode *identifier = parse_identifier();
+    ParseNode *body = parse_block();
+
+    ParseNode *node = parse_node_create(CLASS);
+    node->left = identifier;
+    node->right = body;
+    return node;
+}
+
+ParseNode *parse_function_definition() {
     expect(DEF);
     ParseNode *identifier = parse_expression();
     expect(FUNCTION);
@@ -175,10 +186,12 @@ ParseNode *parse_in() {
 
 ParseNode *parse_expression() {
     if (match(DEF)) {
-        return parse_function_defintion();
+        return parse_function_definition();
+    } else if (match(CLASS)) {
+        return parse_class_definition();
     } else if (match(WHILE)) {
         return parse_while();
-    } else if (match(IF)) {
+    }else if (match(IF)) {
         return parse_if();
     } else if (peek().category == ASSIGNMENT) {
         ParseNode* left = parse_term();

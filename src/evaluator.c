@@ -50,6 +50,13 @@ Value *evaluate(ParseNode *node) {
             Value *value = evaluate(node->right);
             hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
             break;
+        case CLASS:
+            Value *class_value = malloc(sizeof(Value));
+            class_value->type = TYPE_CLASS;
+            class_value->data.node = node;
+
+            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, class_value);
+            break;
         case FUNCTION:
             Value func_value;
             func_value.type = TYPE_FUNCTION;

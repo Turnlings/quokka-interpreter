@@ -1,4 +1,2 @@
->> "Enter Name:"
-name = <<;
 
->> "Hello " + name;
+>> "Hello " + <<;

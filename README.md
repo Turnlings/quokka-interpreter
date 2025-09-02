@@ -16,16 +16,16 @@ For examples, see the [docs](docs/FEATURES.md).
 ### Implemented
 
 - Simple arithmetic
-- Integer variables
+- Basic type (ints & strings)
 - Conditionals
 - While loops
 - Functions
 
 ### Planned
 
-- More types (float, string etc)
+- More types (floats at least)
 - For loops
-- Input/Output
+- Classes
 
 ## Why Call It Quokka???
 
