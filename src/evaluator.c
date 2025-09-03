@@ -105,10 +105,13 @@ Value *evaluate(ParseNode *node) {
                 default:
                     return id_value;
             }
-        case WHILE:
+        case WHILE: {
+            Value *value = NULL;
             while (evaluate(node->left)) {
-                evaluate(node->right);
+                value = evaluate(node->right);
             }
+            return value;
+        }
         case LITERAL:
             return &node->value;
         case OP_ADD:
