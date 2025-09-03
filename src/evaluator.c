@@ -38,7 +38,12 @@ Value *evaluate(ParseNode *node) {
                 return evaluate(node->left);
             } else {
                 if (node->left != NULL) {
-                    evaluate(node->left);
+                    Value *value = evaluate(node->left);
+
+                    if (stack_peek(callStack)->status == 1) {
+                        stack_peek(callStack)->status = 0;
+                        return value;
+                    }
                 }
                 return evaluate(node->right);
             }
@@ -214,6 +219,9 @@ Value *evaluate(ParseNode *node) {
             in->type = TYPE_STRING;
             in->data.stringValue = line;
             return in;
+        case RETURN:
+            stack_peek(callStack)->status = 1;
+            return evaluate(node->left);
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\nString Value: %s\n", node->type, node->value.data.stringValue);
             return 0;

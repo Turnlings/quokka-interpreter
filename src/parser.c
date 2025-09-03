@@ -171,6 +171,14 @@ ParseNode *parse_operator() {
     }
 }
 
+ParseNode *parse_return() {
+    expect(RETURN);
+    ParseNode *node = parse_node_create(RETURN);
+    ParseNode* left = parse_expression();
+    node->left = left;
+    return node;
+}
+
 ParseNode *parse_out() {
     expect(OUT);
     ParseNode *node = parse_node_create(OUT);
@@ -226,6 +234,8 @@ ParseNode *parse_expression() {
         operator->right = right;
 
         return operator;
+    } else if (match(RETURN)) {
+        return parse_return();
     } else {
         return parse_term();
     }

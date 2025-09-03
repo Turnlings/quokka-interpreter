@@ -155,6 +155,7 @@ Keyword keywords[] = {
     {"def", DEF},
     {"class", CLASS},
     {"set", SET},
+    {"return", RETURN},
     {NULL, 0}
 };
 

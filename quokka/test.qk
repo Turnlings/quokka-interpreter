@@ -1,10 +1,11 @@
 
 class Apple() {
     a = 3;
-    b = 0;
+    b = 1;
 
     def doubleA() => {
         set b = a * 2;
+        set b = a * 3;
     };
 };
 

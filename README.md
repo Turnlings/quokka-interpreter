@@ -19,13 +19,13 @@ For examples, see the [docs](docs/FEATURES.md).
 - Basic type (ints & strings)
 - Conditionals
 - While loops
+- Classes and objects
 - Functions
 
 ### Planned
 
 - More types (floats at least)
 - For loops
-- Classes
 
 ## Why Call It Quokka???
 

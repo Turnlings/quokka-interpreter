@@ -58,7 +58,7 @@ foo(5, 3); // Returns 12
 ### Class
 ```c
 class Car(colour) {
-    speed = 10; 
+    speed = 10; // Any initialisation goes here
 
     def print_colour => {
         >> colour;

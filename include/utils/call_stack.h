@@ -7,6 +7,7 @@
 typedef struct StackFrame {
     ParseNode *return_address;
     HashTable *local_variables;
+    int status;
 } StackFrame;
 
 typedef struct CallStack {

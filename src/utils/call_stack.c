@@ -9,6 +9,7 @@
 typedef struct StackFrame {
     ParseNode *return_address;
     HashTable *local_variables;
+    int status;
 } StackFrame;
 
 typedef struct CallStack {
@@ -21,6 +22,7 @@ StackFrame* frame_create() {
     if (!frame) return NULL;
     frame->return_address = NULL;
     frame->local_variables = hashtable_create(32);
+    frame->status = 0;
     return frame;
 } 
 
