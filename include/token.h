@@ -4,6 +4,7 @@
 typedef struct HashTable HashTable;
 
 typedef enum TokenType {
+    PROGRAM,
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,

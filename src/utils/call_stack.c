@@ -72,3 +72,18 @@ int stack_get_value(CallStack *stack, const char *key, Value *out_value) {
     }
     return 0;
 }
+
+void stack_destroy(CallStack *stack) {
+    if (stack == NULL) {
+        return;
+    }
+
+    for (int i = 0; i <= stack->top; i++) {
+        if (stack->frames[i] != NULL) {
+            frame_destroy(stack->frames[i], true);
+        }
+    }
+
+    free(stack->frames);
+    free(stack);
+}

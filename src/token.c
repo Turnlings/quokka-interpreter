@@ -8,6 +8,7 @@ typedef struct HashTable HashTable;
 */
 
 typedef enum {
+    PROGRAM,
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,

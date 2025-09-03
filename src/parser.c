@@ -276,7 +276,7 @@ ParseNode *parse_block() {
 }
 
 ParseNode *parse_program() {
-    ParseNode *root = parse_node_create(STATEMENT_LIST);
+    ParseNode *root = parse_node_create(PROGRAM);
 
     while (position < count) {
         ParseNode *node = parse_node_create(STATEMENT_LIST);

@@ -32,6 +32,11 @@ Value *evaluate(ParseNode *node) {
     }
 
     switch (node->type) {
+        case PROGRAM:
+            Value *program_return = malloc(sizeof(Value));
+            *program_return = *evaluate(node->right); // copy value
+            cleanup();
+            return program_return;
         case STATEMENT_LIST:
             // Automatically make last statement the return value.
             if (node->right == NULL) {
@@ -63,6 +68,7 @@ Value *evaluate(ParseNode *node) {
             int found_object = stack_get_value(callStack, "self", object);
             if (found_object == 0) {
                 runtime_error("Set used but no class to reference");
+                cleanup();
                 exit(1);
             }
 
@@ -88,6 +94,7 @@ Value *evaluate(ParseNode *node) {
             int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
             if (found == 0) {
                 fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
+                cleanup();
                 exit(1);
             }
             switch (id_value->type) {
@@ -119,6 +126,7 @@ Value *evaluate(ParseNode *node) {
                 char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
                 if (!concat) {
                     runtime_error("Malloc Failed");
+                    cleanup();
                     exit(1);
                 }
                 strcpy(concat, left_a->data.stringValue);
@@ -333,4 +341,8 @@ Value *call_object(ParseNode *node) {
         default:
             return member;
     }
+}
+
+void cleanup() {
+    stack_destroy(callStack);
 }
