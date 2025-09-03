@@ -8,9 +8,25 @@
 
 #define MAX_STRING_LENGTH 128
 
-void runtime_error(char* string) {
-    printf("Runtime Error: %s\n", string);
-}
+Value *evaluate_program(ParseNode *node);
+Value *evaluate_statement_list(ParseNode *node);
+Value *evaluate_assignment(ParseNode *node);
+Value *evaluate_set(ParseNode *node);
+Value *evaluate_class(ParseNode *node);
+Value *evaluate_function(ParseNode *node);
+Value *evaluate_identifier(ParseNode *node);
+Value *evaluate_while(ParseNode *node);
+Value *evaluate_literal(ParseNode *node);
+Value *evaluate_op_add(ParseNode *node);
+Value *evaluate_op_binary(ParseNode *node);
+Value *evaluate_op_eq(ParseNode *node);
+Value *evaluate_if(ParseNode *node);
+Value *evaluate_out(ParseNode *node);
+Value *evaluate_in(ParseNode *node);
+Value *evaluate_return(ParseNode *node);
+
+void runtime_error(char* string);
+void cleanup();
 
 CallStack *callStack = NULL;
 
@@ -32,116 +48,21 @@ Value *evaluate(ParseNode *node) {
     }
 
     switch (node->type) {
-        case PROGRAM:
-            Value *program_return = malloc(sizeof(Value));
-            *program_return = *evaluate(node->right); // copy value
-            cleanup();
-            return program_return;
-        case STATEMENT_LIST:
-            // Automatically make last statement the return value.
-            if (node->right == NULL) {
-                return evaluate(node->left);
-            } else {
-                if (node->left != NULL) {
-                    Value *value = evaluate(node->left);
-
-                    if (stack_peek(callStack)->status == 1) {
-                        stack_peek(callStack)->status = 0;
-                        return value;
-                    }
-                }
-                return evaluate(node->right);
-            }
-        case ASSIGNMENT:
-            if (!node->left || !node->left->value.data.stringValue) {
-                fprintf(stderr, "Invalid assignment target\n");
-                return NULL;
-            }
-            Value *value = evaluate(node->right);
-            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
-            return value;
-        case SET: // Like self.identifier
-            Value *rhs = evaluate(node->right);
-
-            // Get the object
-            Value *object = malloc(sizeof(Value));
-            int found_object = stack_get_value(callStack, "self", object);
-            if (found_object == 0) {
-                runtime_error("Set used but no class to reference");
-                cleanup();
-                exit(1);
-            }
-
-            hashtable_set(object->data.object_fields, node->left->value.data.stringValue, rhs);
-            return rhs;
-        case CLASS:
-            Value *class_value = malloc(sizeof(Value));
-            class_value->type = TYPE_CLASS;
-            class_value->data.node = node;
-
-            hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, class_value);
-            break;
-        case FUNCTION:
-            Value *func_value = malloc(sizeof(Value));
-            func_value->type = TYPE_FUNCTION;
-            func_value->data.node = node;
-            hashtable_set(stack_peek(callStack)->local_variables,
-                        node->left->value.data.stringValue,
-                        func_value);
-            break;  
-        case IDENTIFIER:
-            Value *id_value = malloc(sizeof(Value));
-            int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
-            if (found == 0) {
-                fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
-                cleanup();
-                exit(1);
-            }
-            switch (id_value->type) {
-                case TYPE_FUNCTION:
-                    return execute_function(node, id_value);
-                case TYPE_CLASS:
-                    return build_object(node, id_value);
-                default:
-                    return id_value;
-            }
-        case WHILE: {
-            Value *value = NULL;
-            while (evaluate(node->left)) {
-                value = evaluate(node->right);
-            }
-            return value;
-        }
-        case LITERAL:
-            return &node->value;
-        case OP_ADD:
-            Value *left_a = evaluate(node->left);
-            Value *right_a = evaluate(node->right);
-            Value *result_a = malloc(sizeof(Value));
-            if (left_a->type == TYPE_INT && right_a->type == TYPE_INT) {
-                result_a->type = TYPE_INT;
-                result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
-            }
-            else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
-                result_a->type = TYPE_STRING;
-                unsigned int len_left = strlen(left_a->data.stringValue);
-                unsigned int len_right = strlen(right_a->data.stringValue);
-                char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
-                if (!concat) {
-                    runtime_error("Malloc Failed");
-                    cleanup();
-                    exit(1);
-                }
-                strcpy(concat, left_a->data.stringValue);
-                strcat(concat, right_a->data.stringValue);
-                
-                result_a->data.stringValue = concat;
-            } 
-            else {
-                runtime_error("Incompatible types for OP_ADD");
-                return NULL;
-            }
-            return result_a;
+        case PROGRAM: return evaluate_program(node);
+        case STATEMENT_LIST: return evaluate_statement_list(node);
+        case ASSIGNMENT: return evaluate_assignment(node);
+        case SET: return evaluate_set(node); // Like self.identifier
+        case CLASS: return evaluate_class(node);
+        case FUNCTION: return evaluate_function(node);
+        case IDENTIFIER: return evaluate_identifier(node);
+        case WHILE: return evaluate_while(node);
+        case LITERAL: return evaluate_literal(node);
+        case OUT: return evaluate_out(node);
+        case IN: return evaluate_in(node);
+        case RETURN: return evaluate_return(node);
+        case OP_EQ: return evaluate_op_eq(node);
+        case OP_DOT: return call_object(node);
+        case OP_ADD: return evaluate_op_add(node);
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
@@ -149,94 +70,237 @@ Value *evaluate(ParseNode *node) {
         case OP_GTE:
         case OP_LT:
         case OP_LTE:
-            Value *left = evaluate(node->left);
-            Value *right = evaluate(node->right);
-            Value *result = malloc(sizeof(Value));
-
-            if (left->type == TYPE_INT && right->type == TYPE_INT) {
-                result->type = TYPE_INT;
-
-                switch (node->type) {
-                    case OP_SUB:
-                        result->data.intValue = left->data.intValue - right->data.intValue; break;
-                    case OP_MUL:
-                        result->data.intValue = left->data.intValue * right->data.intValue; break;
-                    case OP_DIV:
-                        result->data.intValue = left->data.intValue / right->data.intValue; break;
-                    case OP_GT:
-                        result->data.intValue = left->data.intValue > right->data.intValue; break;
-                    case OP_GTE:
-                        result->data.intValue = left->data.intValue >= right->data.intValue; break;
-                    case OP_LT:
-                        result->data.intValue = left->data.intValue < right->data.intValue; break;
-                    case OP_LTE:
-                        result->data.intValue = left->data.intValue <= right->data.intValue; break;
-                }
-
-                return result;
-            }
-            else {
-                runtime_error("Incompatible types for OPERATOR");
-                return NULL;
-            }
-        case OP_EQ:
-            Value *eq = malloc(sizeof(Value));
-            eq->type = TYPE_INT;
-            eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
-            return eq;
-        case OP_DOT:
-            return call_object(node);
+            return evaluate_op_binary(node);
         case TERN_IF:
         case IF:
-            if ( evaluate(node->left)->data.intValue == 1 ) { 
-                return evaluate(node->right->left); 
-            } else if (node->right->right != NULL){
-                return evaluate(node->right->right);
-            } else {
-                return NULL;
-            }
-        case OUT:
-            Value *to_out = evaluate(node->left);
-            switch(to_out->type) {
-                case TYPE_INT:
-                    printf("%d\n",to_out->data.intValue);
-                    break;
-                case TYPE_STRING:
-                    printf("%s\n",to_out->data.stringValue);
-                    break;
-                default:
-                    runtime_error("Invalid Output Type");
-            }
-            return to_out;
-        case IN:
-            char *line = NULL;
-            size_t len = 0;
-            int nread;
-
-            printf("<< "); // Prompt              
-            nread = getline(&line, &len, stdin);
-
-            if (nread == -1) {
-                runtime_error("Failed to read value");
-            }
-
-            // Remove the newline character
-            if (line[nread - 1] == '\n') {
-                line[nread - 1] = '\0';
-                nread--;
-            }
-
-            Value *in = malloc(sizeof(Value));
-            in->type = TYPE_STRING;
-            in->data.stringValue = line;
-            return in;
-        case RETURN:
-            stack_peek(callStack)->status = 1;
-            return evaluate(node->left);
+            return evaluate_if(node);
         default:
             fprintf(stderr, "Error evaluating Node\nType: %d\nString Value: %s\n", node->type, node->value.data.stringValue);
-            return 0;
+            return NULL;
     }
+}
+
+Value *evaluate_program(ParseNode *node) {
+    Value *program_return = malloc(sizeof(Value));
+    *program_return = *evaluate(node->right); // copy value
+    cleanup();
+    return program_return;
+}
+
+Value *evaluate_statement_list(ParseNode *node) {
+    // Automatically make last statement the return value.
+    if (node->right == NULL) {
+        return evaluate(node->left);
+    } else {
+        if (node->left != NULL) {
+            Value *value = evaluate(node->left);
+
+            if (stack_peek(callStack)->status == 1) {
+                stack_peek(callStack)->status = 0;
+                return value;
+            }
+        }
+        return evaluate(node->right);
+    }
+}
+
+Value *evaluate_assignment(ParseNode *node) {
+    if (!node->left || !node->left->value.data.stringValue) {
+        fprintf(stderr, "Invalid assignment target\n");
+        return NULL;
+    }
+    Value *value = evaluate(node->right);
+    hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
+    return value;
+}
+
+Value *evaluate_set(ParseNode *node) {
+    Value *rhs = evaluate(node->right);
+
+    // Get the object
+    Value *object = malloc(sizeof(Value));
+    int found_object = stack_get_value(callStack, "self", object);
+    if (found_object == 0) {
+        runtime_error("Set used but no class to reference");
+        cleanup();
+        exit(1);
+    }
+
+    hashtable_set(object->data.object_fields, node->left->value.data.stringValue, rhs);
+    return rhs;
+}
+
+Value *evaluate_class(ParseNode *node) {
+    Value *class_value = malloc(sizeof(Value));
+    class_value->type = TYPE_CLASS;
+    class_value->data.node = node;
+
+    hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, class_value);
+    return class_value;
+}
+
+Value *evaluate_function(ParseNode *node) {
+    Value *func_value = malloc(sizeof(Value));
+    func_value->type = TYPE_FUNCTION;
+    func_value->data.node = node;
+    hashtable_set(stack_peek(callStack)->local_variables,
+                node->left->value.data.stringValue,
+                func_value);
+    return func_value;
+}
+
+Value *evaluate_identifier(ParseNode *node) {
+    Value *id_value = malloc(sizeof(Value));
+    int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
+    if (found == 0) {
+        fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
+        cleanup();
+        exit(1);
+    }
+    switch (id_value->type) {
+        case TYPE_FUNCTION:
+            return execute_function(node, id_value);
+        case TYPE_CLASS:
+            return build_object(node, id_value);
+        default:
+            return id_value;
+    }
+}
+
+Value *evaluate_while(ParseNode *node) {
+    Value *value = NULL;
+    while (evaluate(node->left)) {
+        value = evaluate(node->right);
+    }
+    return value;
+}
+
+Value *evaluate_literal(ParseNode *node) {
+    return &node->value;
+}
+
+Value *evaluate_op_add(ParseNode *node) {
+    Value *left_a = evaluate(node->left);
+    Value *right_a = evaluate(node->right);
+    Value *result_a = malloc(sizeof(Value));
+    if (left_a->type == TYPE_INT && right_a->type == TYPE_INT) {
+        result_a->type = TYPE_INT;
+        result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
+    }
+    else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
+        result_a->type = TYPE_STRING;
+        unsigned int len_left = strlen(left_a->data.stringValue);
+        unsigned int len_right = strlen(right_a->data.stringValue);
+        char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
+        if (!concat) {
+            runtime_error("Malloc Failed");
+            cleanup();
+            exit(1);
+        }
+        strcpy(concat, left_a->data.stringValue);
+        strcat(concat, right_a->data.stringValue);
+        
+        result_a->data.stringValue = concat;
+    } 
+    else {
+        runtime_error("Incompatible types for OP_ADD");
+        return NULL;
+    }
+    return result_a;
+}
+
+Value *evaluate_op_binary(ParseNode *node) {
+    Value *left = evaluate(node->left);
+    Value *right = evaluate(node->right);
+    Value *result = malloc(sizeof(Value));
+
+    if (left->type == TYPE_INT && right->type == TYPE_INT) {
+        result->type = TYPE_INT;
+
+        switch (node->type) {
+            case OP_SUB:
+                result->data.intValue = left->data.intValue - right->data.intValue; break;
+            case OP_MUL:
+                result->data.intValue = left->data.intValue * right->data.intValue; break;
+            case OP_DIV:
+                result->data.intValue = left->data.intValue / right->data.intValue; break;
+            case OP_GT:
+                result->data.intValue = left->data.intValue > right->data.intValue; break;
+            case OP_GTE:
+                result->data.intValue = left->data.intValue >= right->data.intValue; break;
+            case OP_LT:
+                result->data.intValue = left->data.intValue < right->data.intValue; break;
+            case OP_LTE:
+                result->data.intValue = left->data.intValue <= right->data.intValue; break;
+        }
+
+        return result;
+    }
+    else {
+        runtime_error("Incompatible types for OPERATOR");
+        return NULL;
+    }
+}
+
+Value *evaluate_op_eq(ParseNode *node) {
+    Value *eq = malloc(sizeof(Value));
+    eq->type = TYPE_INT;
+    eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
+    return eq;
+}
+
+Value *evaluate_if(ParseNode *node) {
+    if ( evaluate(node->left)->data.intValue == 1 ) { 
+        return evaluate(node->right->left); 
+    } else if (node->right->right != NULL){
+        return evaluate(node->right->right);
+    } else {
+        return NULL;
+    }
+}
+
+Value *evaluate_out(ParseNode *node) {
+    Value *to_out = evaluate(node->left);
+    switch(to_out->type) {
+        case TYPE_INT:
+            printf("%d\n",to_out->data.intValue);
+            break;
+        case TYPE_STRING:
+            printf("%s\n",to_out->data.stringValue);
+            break;
+        default:
+            runtime_error("Invalid Output Type");
+    }
+    return to_out;
+}
+
+Value *evaluate_in(ParseNode *node) {
+    char *line = NULL;
+    size_t len = 0;
+    int nread;
+
+    printf("<< "); // Prompt              
+    nread = getline(&line, &len, stdin);
+
+    if (nread == -1) {
+        runtime_error("Failed to read value");
+    }
+
+    // Remove the newline character
+    if (line[nread - 1] == '\n') {
+        line[nread - 1] = '\0';
+        nread--;
+    }
+
+    Value *in = malloc(sizeof(Value));
+    in->type = TYPE_STRING;
+    in->data.stringValue = line;
+    return in;
+}
+
+Value *evaluate_return(ParseNode *node) {
+    stack_peek(callStack)->status = 1;
+    return evaluate(node->left);
 }
 
 Value *execute_function(ParseNode *node, Value *id_value) {
@@ -344,6 +408,10 @@ Value *call_object(ParseNode *node) {
         default:
             return member;
     }
+}
+
+void runtime_error(char* string) {
+    printf("Runtime Error: %s\n", string);
 }
 
 void cleanup() {
