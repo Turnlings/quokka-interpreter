@@ -60,7 +60,7 @@ int main() {
         free_tokens(tokens, token_count);
         free(input);
         free(c_code);
-        free(ast);
+        free_ast(ast);
     } else {
         fprintf(stderr, "File read failed\n");
     }
@@ -108,6 +108,7 @@ void print_ast(ParseNode *node) {
             printf(",");
             print_ast(node->right);
             break;
+        case PROGRAM:
         case STATEMENT_LIST:
             printf("STMT:");
             print_ast(node->left);

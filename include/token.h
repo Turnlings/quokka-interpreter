@@ -91,5 +91,6 @@ typedef struct ParseNode {
 } ParseNode;
 
 ParseNode *parse_node_create(TokenType type);
+void free_ast(ParseNode *node);
 
 #endif

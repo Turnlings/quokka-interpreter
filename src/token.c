@@ -111,3 +111,10 @@ ParseNode *parse_node_create(TokenType type){
     node->right = NULL;
     return node;
 }
+
+void free_ast(ParseNode *node) {
+    if (!node) return;
+    free_ast(node->left);
+    free_ast(node->right);
+    free(node);
+}
