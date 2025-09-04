@@ -5,7 +5,6 @@
 #include "utils/hash_table.h"
 #include "token.h"
 #include "lexer.h"
-#include "transpiler.h"
 #include "parser.h"
 #include "evaluator.h"
 
@@ -28,14 +27,6 @@ int main() {
 
         printf("Token Count: %d\n", token_count);
 
-        // Transpile to C from tokens to help debug tokenization
-        char* c_code = transpileToC(tokens, token_count);
-        if (c_code == NULL) {
-            fprintf(stderr, "Transpilation failed\n");
-        }
-
-        write_file("transpiled.c", c_code);
-
         // Parsing
         ParseNode *ast = parse(tokens, token_count);
         if (ast == NULL) {
@@ -57,10 +48,10 @@ int main() {
         else if (return_value->type == TYPE_STRING) {
             printf("Evaluation Return Value: %s\n", return_value->data.stringValue);
         }
+        
+        free_ast(ast);
         free_tokens(tokens, token_count);
         free(input);
-        free(c_code);
-        free_ast(ast);
     } else {
         fprintf(stderr, "File read failed\n");
     }
