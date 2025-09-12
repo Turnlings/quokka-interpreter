@@ -102,6 +102,7 @@ struct ParseNode {
 };
 
 ParseNode *parse_node_create(TokenType type);
+void print_ast(ParseNode *node);
 void free_ast(ParseNode *node);
 
 #endif

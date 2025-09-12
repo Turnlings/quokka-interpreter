@@ -19,6 +19,78 @@ ParseNode *parse_node_create(TokenType type){
     return node;
 }
 
+const char *token_type_to_string(TokenType type) {
+    switch (type) {
+        case PROGRAM: return "PRGRM";
+        case STATEMENT_LIST: return "STMNT";
+        case CLASS: return "CLASS";
+        case FUNCTION: return "FUNC";
+        case WHILE: return "WHILE";
+        default: return "?";
+    }
+}
+
+void print_binary_operator(ParseNode *node) {
+    printf("(OP: %s ", node->value.data.stringValue);
+    print_ast(node->left);
+    printf(",");
+    print_ast(node->right);
+    printf(") ");
+}
+
+void print_ast(ParseNode *node) {
+    if (node == NULL) return;
+
+    switch (node->type) {
+        case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_DOT:
+        case OP_GT: case OP_GTE: case OP_LT: case OP_LTE: case OP_EQ:
+        case ASSIGNMENT:
+            print_binary_operator(node);
+            break;
+        case LITERAL: case IDENTIFIER:
+            if (node->value.type == TYPE_INT) {
+                printf("%d", node->value.data.intValue);
+            } else {
+                printf("%s", node->value.data.stringValue);
+            }
+            break;
+        case PROGRAM: case STATEMENT_LIST: case CLASS:
+            printf("%s: ", token_type_to_string(node->type));
+            print_ast(node->left);
+            print_ast(node->right);
+            break;
+        case FUNCTION: case WHILE:
+            printf("%s: ", token_type_to_string(node->type));
+            print_ast(node->left);
+            printf(" BODY: ");
+            print_ast(node->right);
+            break;
+        case IF:
+            printf("IF ");
+            print_ast(node->left);
+            printf("THEN ");
+            print_ast(node->right->left);
+            printf("ELSE");
+            print_ast(node->right->right);
+            break;
+        case FOR:
+            printf("FOR: ");
+            print_ast(node->left->left);
+            print_ast(node->left->right->left);
+            print_ast(node->left->right->right);
+            printf(" DO: ");
+            print_ast(node->right);
+            break;
+        case OUT:
+            printf("OUT: ");
+            print_ast(node->left);
+            break;
+        default:
+            printf("?");
+            break;
+    }
+}
+
 void free_ast(ParseNode *node) {
     if (!node) return;
     free_ast(node->left);

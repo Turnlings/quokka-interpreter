@@ -11,10 +11,6 @@
 #define MAX_TOKEN_COUNT 128
 #define MAX_SYMBOL_COUNT 128
 
-void print_ast(ParseNode *node);
-
-// TODO: make sure following naming conventions everywhere
-
 int main() {
     char *input = read_file("quokka/test.qk");
     if (input) {
@@ -56,95 +52,4 @@ int main() {
         fprintf(stderr, "File read failed\n");
     }
     return 0;
-}
-
-// For debugging the parser
-void print_ast(ParseNode *node) {
-    if (node == NULL) return;
-
-    switch (node->type) {
-        case LITERAL:
-            printf("NUM: %d", node->value.data.intValue);
-            //print_ast(node->right);
-            break;
-        case OP_ADD:
-        case OP_SUB:
-        case OP_MUL:
-        case OP_DIV:
-        case OP_DOT:
-            printf("(%s", node->value.data.stringValue);
-            print_ast(node->left);
-            printf(",");
-            print_ast(node->right);
-            printf(")");
-            break;
-        case OP_GT:
-        case OP_GTE:
-        case OP_LT:
-        case OP_LTE:
-        case OP_EQ:
-            printf("( COMP OP: %s ", node->value.data.stringValue);
-            print_ast(node->left);
-            printf(",");
-            print_ast(node->right);
-            printf(")");
-            break;
-        case IDENTIFIER:
-            printf("%s", node->value.data.stringValue);
-            print_ast(node->right);
-            break;
-        case ASSIGNMENT:
-            printf(" = ");
-            print_ast(node->left);
-            printf(",");
-            print_ast(node->right);
-            break;
-        case PROGRAM:
-        case STATEMENT_LIST:
-            printf("STMT:");
-            print_ast(node->left);
-            print_ast(node->right);
-            break;
-        case TERN_IF:
-        case IF:
-            printf("IF ");
-            print_ast(node->left);
-            printf("THEN ");
-            print_ast(node->right->left);
-            printf("ELSE");
-            print_ast(node->right->right);
-            break;
-        case FUNCTION:
-            printf("FUNC: ");
-            print_ast(node->left);
-            printf(" BODY: ");
-            print_ast(node->right);
-            break;
-        case WHILE:
-            printf("WHILE: ");
-            print_ast(node->left);
-            printf(" DO: ");
-            print_ast(node->right);
-            break;
-        case FOR:
-            printf("FOR: ");
-            print_ast(node->left->left);
-            print_ast(node->left->right->left);
-            print_ast(node->left->right->right);
-            printf(" DO: ");
-            print_ast(node->right);
-            break;
-        case OUT:
-            printf("OUT: ");
-            print_ast(node->left);
-            break;
-        case CLASS:
-            printf("CLASS: ");
-            print_ast(node->left);
-            print_ast(node->right);
-            break;
-        default:
-            printf("?");
-            break;
-    }
 }
