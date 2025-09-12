@@ -1,59 +1,67 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 typedef struct HashTable HashTable;
 
-typedef enum TokenType {
+typedef enum {
+    // General
     PROGRAM,
     IDENTIFIER,
     KEYWORD,
     SEPERATOR,
+
+    // Arithmetic operators
     OP_ADD,
     OP_SUB,
     OP_MUL,
     OP_DIV,
 
+    // Comparison operators
     OP_GT, OP_GTE,
     OP_LT, OP_LTE,
     OP_EQ,
 
+    // Other operators
     OP_DOT,
+    ASSIGNMENT,
 
+    // Literals
     RETURN,
     LITERAL,
     STRING,
     COMMENT,
     WHITESPACE,
-    ASSIGNMENT,
-    STATEMENT_LIST,
 
-    // For if statments
-    TERN_IF,
-    TERN_COLON,
-
-    PAREN_L,
-    PAREN_R,
-
-    BRACES_L,
-    BRACES_R,
-    BLOCK,
-
-    DEF,
-    FUNCTION,
-    COMMA,
-
+    // Control flow
     IF,
     ELSE,
     WHILE,
     DO,
     FOR,
+    TERN_IF,
+    TERN_COLON,
 
-    IN,
-    OUT,
-    
+    // Structure
+    STATEMENT_LIST,
+    BLOCK,
+    FUNCTION,
+    DEF,
     CLASS,
     SET,
-    
+
+    // Symbols
+    PAREN_L, PAREN_R,
+    BRACES_L, BRACES_R,
+    COMMA,
+
+    // I/O
+    IN,
+    OUT,
+
+    // Misc
     CONTROL
 } TokenType;
 
@@ -86,12 +94,12 @@ typedef struct Token {
     char *text;
 } Token;
 
-typedef struct ParseNode {
+struct ParseNode {
     TokenType type;
     Value value;
     struct ParseNode *left;
     struct ParseNode *right;
-} ParseNode;
+};
 
 ParseNode *parse_node_create(TokenType type);
 void free_ast(ParseNode *node);
