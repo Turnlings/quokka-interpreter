@@ -1,15 +1,25 @@
 # Language Features
 
-### Basic Arithmetic
+### Variable Assignment 
+Variables are dynamically typed.
 ```c
-1 + 2; // Returns 3
+a = 123; // Returns 123
+
+b = 32.6; // Returns 32.6
+
+c = "Hello World" // Returns Hello World
 ```
 
-### Variable Assignment 
+### Basic Operators
+Support for all standard arithmetic operators, the second operand is automatically casted when required.
 ```c
-a = 123;
+1 + 2; // Returns 3
 
-a; // Returns 123
+3.2 - 1; // Returns 2.2
+```
+The \+ operator is overloaded for string concatenation.
+```c
+"Hello " + "World"; // Returns Hello World
 ```
 
 ### If-Else Statements
@@ -20,7 +30,7 @@ if a <= b do {
     c = 2;
 }
 
-// Or in this case it can be simpler
+// Curly braces are not required
 c = if a <= b do 1 else 2;
 ```
 
@@ -29,6 +39,14 @@ c = if a <= b do 1 else 2;
 while a <= b do {
     // Body here
     a = a + 1;
+}
+```
+
+### For Loops
+For loops have three parameters, an initialiser, a condition, and an increment.
+```c
+for int i = 0; i <= 10; i = i + 1 {
+    >> i; // Prints numbers 0 to 10 inclusive
 }
 ```
 
@@ -50,9 +68,9 @@ def foo(x, y) => {
 foo(5, 3); // Returns 12
 ```
 
-### Basic Print Statements
+### Print to Console
 ```c
->> "Hello World" // Outputs Hello World to the console
+>> "Hello World" // Prints Hello World
 ```
 
 ### Class
@@ -77,5 +95,4 @@ car.print_colour; // red
 car.set_colour("blue");
 
 car.print_colour; // blue
-
 ```

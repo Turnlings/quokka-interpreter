@@ -2,7 +2,7 @@
 
 ## Overview
 
-A simple interpreter for a toy programming language supporting basic operations.  
+An interpreter for a dynamically typed, object-oriented toy programming language.
 
 For detailed documentation, see the [docs/](docs) folder.
 
@@ -15,17 +15,22 @@ For examples, see the [docs](docs/FEATURES.md).
 
 ### Implemented
 
-- Simple arithmetic
-- Basic type (ints & strings)
+- Dynamic Types (Integers, Floats and Strings)
+- Simple Arithmetic
 - Conditionals
-- While loops
-- Classes and objects
+- While and For Loops
 - Functions
+- Classes and Objects
 
 ### Planned
 
-- More types (floats at least)
-- For loops
+- Logical Operators
+- Unary Operators
+- Arrays/Lists
+- Import/Include Statements
+- Error Handling
+- Better Error Messages
+- Standard Library
 
 ## Why Call It Quokka???
 

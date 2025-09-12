@@ -6,6 +6,8 @@
 
 ## Lexer
 
+> Documentation Outdated
+
 Parses the string of the input file and tokenizes it into the following sets
 
 ```
@@ -21,6 +23,8 @@ SEMI-COLON : {;}
 Builds an Abstract Syntax Tree (AST) using recursive descent parsing.  
 
 Defined by the following context free grammar:
+
+> Grammar Outdated
 
 ```
 <program>    ::= <statement> | <statement> <program>
