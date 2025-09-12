@@ -196,37 +196,80 @@ Value *evaluate_literal(ParseNode *node) {
 }
 
 Value *evaluate_op_add(ParseNode *node) {
-    Value *left_a = evaluate(node->left);
-    Value *right_a = evaluate(node->right);
-    Value *result_a = malloc(sizeof(Value));
-    if (left_a->type == TYPE_INT && right_a->type == TYPE_INT) {
-        result_a->type = TYPE_INT;
-        result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
+    Value *left = evaluate(node->left);
+    Value *right = evaluate(node->right);
+    if (left->type == TYPE_INT || left->type == TYPE_FLOAT) {
+        return evaluate_op_binary(node); // TODO: look at if double evaluation left and right has side effects
     }
-    else if (left_a->type == TYPE_FLOAT && right_a->type == TYPE_FLOAT) {
-        result_a->type = TYPE_FLOAT;
-        result_a->data.floatValue = left_a->data.floatValue + right_a->data.floatValue;
-    }
-    else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
-        result_a->type = TYPE_STRING;
-        unsigned int len_left = strlen(left_a->data.stringValue);
-        unsigned int len_right = strlen(right_a->data.stringValue);
+
+    Value *result = malloc(sizeof(Value));
+    if (left->type == TYPE_STRING && right->type == TYPE_STRING) {
+        result->type = TYPE_STRING;
+        unsigned int len_left = strlen(left->data.stringValue);
+        unsigned int len_right = strlen(right->data.stringValue);
         char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
         if (!concat) {
             runtime_error("Malloc Failed");
             cleanup();
             exit(1);
         }
-        strcpy(concat, left_a->data.stringValue);
-        strcat(concat, right_a->data.stringValue);
+        strcpy(concat, left->data.stringValue);
+        strcat(concat, right->data.stringValue);
         
-        result_a->data.stringValue = concat;
+        result->data.stringValue = concat;
     } 
     else {
         runtime_error("Incompatible types for OP_ADD");
+        free(result);
         return NULL;
     }
-    return result_a;
+    return result;
+}
+
+Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right) {
+    switch (type) {
+        case OP_ADD:
+            result->data.intValue = left + right; break;
+        case OP_SUB:
+            result->data.intValue = left - right; break;
+        case OP_MUL:
+            result->data.intValue = left * right; break;
+        case OP_DIV:
+            result->data.intValue = left / right; break;
+        case OP_GT:
+            result->data.intValue = left > right; break;
+        case OP_GTE:
+            result->data.intValue = left >= right; break;
+        case OP_LT:
+            result->data.intValue = left < right; break;
+        case OP_LTE:
+            result->data.intValue = left <= right; break;
+    }
+
+    return result;
+}
+
+Value *evaluate_op_binary_float(TokenType type, Value *result, double left, double right) {
+    switch (type) {
+        case OP_ADD:
+            result->data.floatValue = left + right; break;
+        case OP_SUB:
+            result->data.floatValue = left - right; break;
+        case OP_MUL:
+            result->data.floatValue = left * right; break;
+        case OP_DIV:
+            result->data.floatValue = left / right; break;
+        case OP_GT:
+            result->data.floatValue = left > right; break;
+        case OP_GTE:
+            result->data.floatValue = left >= right; break;
+        case OP_LT:
+            result->data.floatValue = left < right; break;
+        case OP_LTE:
+            result->data.floatValue = left <= right; break;
+    }
+
+    return result;
 }
 
 Value *evaluate_op_binary(ParseNode *node) {
@@ -236,46 +279,22 @@ Value *evaluate_op_binary(ParseNode *node) {
 
     if (left->type == TYPE_INT && right->type == TYPE_INT) {
         result->type = TYPE_INT;
-
-        switch (node->type) {
-            case OP_SUB:
-                result->data.intValue = left->data.intValue - right->data.intValue; break;
-            case OP_MUL:
-                result->data.intValue = left->data.intValue * right->data.intValue; break;
-            case OP_DIV:
-                result->data.intValue = left->data.intValue / right->data.intValue; break;
-            case OP_GT:
-                result->data.intValue = left->data.intValue > right->data.intValue; break;
-            case OP_GTE:
-                result->data.intValue = left->data.intValue >= right->data.intValue; break;
-            case OP_LT:
-                result->data.intValue = left->data.intValue < right->data.intValue; break;
-            case OP_LTE:
-                result->data.intValue = left->data.intValue <= right->data.intValue; break;
-        }
-
+        evaluate_op_binary_int(node->type, result, left->data.intValue, right->data.intValue);
         return result;
     }
     else if (left->type == TYPE_FLOAT && right->type == TYPE_FLOAT) {
         result->type = TYPE_FLOAT;
-
-        switch (node->type) {
-            case OP_SUB:
-                result->data.intValue = left->data.floatValue - right->data.floatValue; break;
-            case OP_MUL:
-                result->data.floatValue = left->data.floatValue * right->data.floatValue; break;
-            case OP_DIV:
-                result->data.floatValue = left->data.floatValue / right->data.floatValue; break;
-            case OP_GT:
-                result->data.floatValue = left->data.floatValue > right->data.floatValue; break;
-            case OP_GTE:
-                result->data.floatValue = left->data.floatValue >= right->data.floatValue; break;
-            case OP_LT:
-                result->data.floatValue = left->data.floatValue < right->data.floatValue; break;
-            case OP_LTE:
-                result->data.floatValue = left->data.floatValue <= right->data.floatValue; break;
-        }
-
+        evaluate_op_binary_float(node->type, result, left->data.floatValue, right->data.floatValue);
+        return result;
+    }
+    else if (left->type == TYPE_INT && right->type == TYPE_FLOAT) {
+        result->type = TYPE_INT;
+        evaluate_op_binary_int(node->type, result, left->data.intValue, (int)right->data.floatValue);
+        return result;
+    }
+    else if (left->type == TYPE_FLOAT && right->type == TYPE_INT) {
+        result->type = TYPE_FLOAT;
+        evaluate_op_binary_float(node->type, result, left->data.floatValue, (double)right->data.intValue);
         return result;
     }
     else {
