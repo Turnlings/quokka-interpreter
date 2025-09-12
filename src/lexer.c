@@ -98,9 +98,15 @@ static bool match(char c) {
 }
 
 void number() {
+    TokenType type = LITERAL;
     while (isDigit(peek())) advance();
 
-    add_token_string(LITERAL, substring(source, start, current - 1));
+    if (match('.')) {
+        type = FLOAT;
+        while (isDigit(peek())) advance();
+    }
+
+    add_token_string(type, substring(source, start, current - 1));
 }
 
 void identifier() {

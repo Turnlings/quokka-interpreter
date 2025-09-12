@@ -41,6 +41,9 @@ int main() {
         if (return_value->type == TYPE_INT) {
             printf("Evaluation Return Value: %d\n", return_value->data.intValue);
         }
+        if (return_value->type == TYPE_FLOAT) {
+            printf("Evaluation Return Value: %f\n", return_value->data.floatValue);
+        }
         else if (return_value->type == TYPE_STRING) {
             printf("Evaluation Return Value: %s\n", return_value->data.stringValue);
         }

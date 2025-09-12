@@ -50,7 +50,11 @@ void print_ast(ParseNode *node) {
         case LITERAL: case IDENTIFIER:
             if (node->value.type == TYPE_INT) {
                 printf("%d", node->value.data.intValue);
-            } else {
+            } 
+            else if (node->value.type == TYPE_FLOAT) {
+                printf("%.2f", node->value.data.floatValue);
+            } 
+            else {
                 printf("%s", node->value.data.stringValue);
             }
             break;

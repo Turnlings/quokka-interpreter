@@ -203,6 +203,10 @@ Value *evaluate_op_add(ParseNode *node) {
         result_a->type = TYPE_INT;
         result_a->data.intValue = left_a->data.intValue + right_a->data.intValue;
     }
+    else if (left_a->type == TYPE_FLOAT && right_a->type == TYPE_FLOAT) {
+        result_a->type = TYPE_FLOAT;
+        result_a->data.floatValue = left_a->data.floatValue + right_a->data.floatValue;
+    }
     else if (left_a->type == TYPE_STRING && right_a->type == TYPE_STRING) {
         result_a->type = TYPE_STRING;
         unsigned int len_left = strlen(left_a->data.stringValue);
@@ -252,13 +256,35 @@ Value *evaluate_op_binary(ParseNode *node) {
 
         return result;
     }
+    else if (left->type == TYPE_FLOAT && right->type == TYPE_FLOAT) {
+        result->type = TYPE_FLOAT;
+
+        switch (node->type) {
+            case OP_SUB:
+                result->data.intValue = left->data.floatValue - right->data.floatValue; break;
+            case OP_MUL:
+                result->data.floatValue = left->data.floatValue * right->data.floatValue; break;
+            case OP_DIV:
+                result->data.floatValue = left->data.floatValue / right->data.floatValue; break;
+            case OP_GT:
+                result->data.floatValue = left->data.floatValue > right->data.floatValue; break;
+            case OP_GTE:
+                result->data.floatValue = left->data.floatValue >= right->data.floatValue; break;
+            case OP_LT:
+                result->data.floatValue = left->data.floatValue < right->data.floatValue; break;
+            case OP_LTE:
+                result->data.floatValue = left->data.floatValue <= right->data.floatValue; break;
+        }
+
+        return result;
+    }
     else {
         runtime_error("Incompatible types for OPERATOR");
         return NULL;
     }
 }
 
-Value *evaluate_op_eq(ParseNode *node) {
+Value *evaluate_op_eq(ParseNode *node) { // TODO: add string support
     Value *eq = malloc(sizeof(Value));
     eq->type = TYPE_INT;
     eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
@@ -280,6 +306,9 @@ Value *evaluate_out(ParseNode *node) {
     switch(to_out->type) {
         case TYPE_INT:
             printf("%d\n",to_out->data.intValue);
+            break;
+        case TYPE_FLOAT:
+            printf(".2%f\n",to_out->data.floatValue);
             break;
         case TYPE_STRING:
             printf("%s\n",to_out->data.stringValue);

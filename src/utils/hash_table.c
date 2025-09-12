@@ -55,7 +55,7 @@ HashTable *hashtable_create(size_t size) {
  */
 void hashtable_set(HashTable *table, char *key, Value *value) {
     if (value == NULL) {
-        printf("Attempted to assign null to identifier\n");
+        printf("Attempted to assign null to key: %s\n", key);
     }
     unsigned int pos = hash(key, table->size);
     Pair *entry = table->buckets[pos];

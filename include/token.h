@@ -31,6 +31,7 @@ typedef enum {
     // Literals
     RETURN,
     LITERAL,
+    FLOAT,
     STRING,
     COMMENT,
     WHITESPACE,
@@ -82,7 +83,7 @@ typedef struct Value {
     ValueType type;
     union {
         int intValue;
-        float floatValue;
+        double floatValue;
         char *stringValue;
         ParseNode *node;
         HashTable *object_fields;
