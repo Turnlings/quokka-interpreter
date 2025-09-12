@@ -13,7 +13,18 @@ Token current_t;
 int count;
 
 void syntax_error(char* string) {
-    printf("%s\nAt token: %d\n", string, position);
+    printf("Syntax Error: %s at token %d\n", string, position);
+    if (position - 1 >= 0) {
+        printf("%s ", input_tokens[position - 1].text);
+    }
+    if (position < count) {
+        printf("%s ", input_tokens[position].text);
+    }
+    if (position + 1 < count) {
+        printf("%s ", input_tokens[position + 1].text);
+    }
+
+    printf("\n");
 }
 
 static void advance() {
@@ -100,6 +111,30 @@ ParseNode *parse_while() {
     ParseNode *body = parse_block();
     ParseNode *node = parse_node_create(WHILE);
     node->left = condition;
+    node->right = body;
+    return node;
+}
+
+ParseNode *parse_for() {
+    expect(FOR);
+    ParseNode *initialise = parse_expression();
+    expect(SEPERATOR);
+    ParseNode *condition = parse_expression();
+    expect(SEPERATOR);
+    ParseNode *change = parse_expression();
+    expect(SEPERATOR);
+    ParseNode *body = parse_block();
+
+    ParseNode *node = parse_node_create(FOR);
+    ParseNode *control_p = parse_node_create(CONTROL);
+    ParseNode *control_c = parse_node_create(CONTROL);
+
+    node->left = control_p;
+    control_p->left = initialise;
+    control_p->right = control_c;
+    control_c->left = condition;
+    control_c->right = change;
+
     node->right = body;
     return node;
 }
@@ -210,6 +245,8 @@ ParseNode *parse_expression() {
         return set;
     } else if (match(WHILE)) {
         return parse_while();
+    } else if (match(FOR)) {
+        return parse_for();    
     }else if (match(IF)) {
         return parse_if();
     } else if (peek().category == ASSIGNMENT) {
@@ -265,7 +302,7 @@ ParseNode *parse_block() {
             if (match(SEPERATOR)) {
                 advance();
             } else {
-                syntax_error("Missing semi-colon");
+                syntax_error("Missing semi-colon in block");
             }
         }
         advance();

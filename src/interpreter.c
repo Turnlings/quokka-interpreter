@@ -126,6 +126,14 @@ void print_ast(ParseNode *node) {
             printf(" DO: ");
             print_ast(node->right);
             break;
+        case FOR:
+            printf("FOR: ");
+            print_ast(node->left->left);
+            print_ast(node->left->right->left);
+            print_ast(node->left->right->right);
+            printf(" DO: ");
+            print_ast(node->right);
+            break;
         case OUT:
             printf("OUT: ");
             print_ast(node->left);

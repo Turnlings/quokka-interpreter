@@ -151,6 +151,7 @@ Keyword keywords[] = {
     {"if", IF},
     {"else", ELSE},
     {"while", WHILE},
+    {"for", FOR},
     {"do", DO},
     {"def", DEF},
     {"class", CLASS},

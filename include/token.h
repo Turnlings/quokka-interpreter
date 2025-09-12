@@ -46,12 +46,15 @@ typedef enum TokenType {
     ELSE,
     WHILE,
     DO,
+    FOR,
 
     IN,
     OUT,
     
     CLASS,
-    SET
+    SET,
+    
+    CONTROL
 } TokenType;
 
 int is_operator(TokenType type);

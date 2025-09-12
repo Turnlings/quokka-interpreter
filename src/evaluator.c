@@ -16,6 +16,7 @@ Value *evaluate_class(ParseNode *node);
 Value *evaluate_function(ParseNode *node);
 Value *evaluate_identifier(ParseNode *node);
 Value *evaluate_while(ParseNode *node);
+Value *evaluate_for(ParseNode *node);
 Value *evaluate_literal(ParseNode *node);
 Value *evaluate_op_add(ParseNode *node);
 Value *evaluate_op_binary(ParseNode *node);
@@ -56,6 +57,7 @@ Value *evaluate(ParseNode *node) {
         case FUNCTION: return evaluate_function(node);
         case IDENTIFIER: return evaluate_identifier(node);
         case WHILE: return evaluate_while(node);
+        case FOR: return evaluate_for(node);
         case LITERAL: return evaluate_literal(node);
         case OUT: return evaluate_out(node);
         case IN: return evaluate_in(node);
@@ -173,6 +175,20 @@ Value *evaluate_while(ParseNode *node) {
         value = evaluate(node->right);
     }
     return value;
+}
+
+Value *evaluate_for(ParseNode *node) {
+    Value *return_value = NULL;
+
+    // Initialise
+    evaluate(node->left->left);
+
+    while(evaluate(node->left->right->left)->data.intValue) {
+        return_value = evaluate(node->right);
+        evaluate(node->left->right->right); // The change like i++;
+    }
+    
+    return return_value;
 }
 
 Value *evaluate_literal(ParseNode *node) {
