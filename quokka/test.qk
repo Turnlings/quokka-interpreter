@@ -1,3 +1,8 @@
-for i = 0; i < 10; i++; {
-    >> i;
+a = false;
+b = true;
+
+if a || b do {
+    >> "hi";
 };
+
+1;

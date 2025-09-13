@@ -21,6 +21,7 @@ Value *evaluate_literal(ParseNode *node);
 Value *evaluate_op_add(ParseNode *node);
 Value *evaluate_op_binary(ParseNode *node);
 Value *evaluate_op_eq(ParseNode *node);
+Value *evaluate_op_not(ParseNode *node);
 Value *evaluate_if(ParseNode *node);
 Value *evaluate_out(ParseNode *node);
 Value *evaluate_in(ParseNode *node);
@@ -72,7 +73,10 @@ Value *evaluate(ParseNode *node) {
         case OP_GTE:
         case OP_LT:
         case OP_LTE:
+        case OP_AND:
+        case OP_OR:
             return evaluate_op_binary(node);
+        case OP_NOT: return evaluate_op_not(node);
         case TERN_IF:
         case IF:
             return evaluate_if(node);
@@ -228,6 +232,13 @@ Value *evaluate_op_add(ParseNode *node) {
 
 Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right) {
     switch (type) {
+        case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV:
+            result->type = TYPE_INT;
+            break;
+        default:
+            result->type = TYPE_BOOL;
+    }
+    switch (type) {
         case OP_ADD:
             result->data.intValue = left + right; break;
         case OP_SUB:
@@ -244,12 +255,23 @@ Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right
             result->data.intValue = left < right; break;
         case OP_LTE:
             result->data.intValue = left <= right; break;
+        case OP_AND:
+            result->data.intValue = left && right; break;
+        case OP_OR:
+            result->data.intValue = left || right; break;
     }
 
     return result;
 }
 
 Value *evaluate_op_binary_float(TokenType type, Value *result, double left, double right) {
+    switch (type) {
+        case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV:
+            result->type = TYPE_FLOAT;
+            break;
+        default:
+            result->type = TYPE_BOOL;
+    }
     switch (type) {
         case OP_ADD:
             result->data.floatValue = left + right; break;
@@ -260,13 +282,13 @@ Value *evaluate_op_binary_float(TokenType type, Value *result, double left, doub
         case OP_DIV:
             result->data.floatValue = left / right; break;
         case OP_GT:
-            result->data.floatValue = left > right; break;
+            result->data.intValue = left > right; break;
         case OP_GTE:
-            result->data.floatValue = left >= right; break;
+            result->data.intValue = left >= right; break;
         case OP_LT:
-            result->data.floatValue = left < right; break;
+            result->data.intValue = left < right; break;
         case OP_LTE:
-            result->data.floatValue = left <= right; break;
+            result->data.intValue = left <= right; break;
     }
 
     return result;
@@ -278,23 +300,23 @@ Value *evaluate_op_binary(ParseNode *node) {
     Value *result = malloc(sizeof(Value));
 
     if (left->type == TYPE_INT && right->type == TYPE_INT) {
-        result->type = TYPE_INT;
         evaluate_op_binary_int(node->type, result, left->data.intValue, right->data.intValue);
         return result;
     }
     else if (left->type == TYPE_FLOAT && right->type == TYPE_FLOAT) {
-        result->type = TYPE_FLOAT;
         evaluate_op_binary_float(node->type, result, left->data.floatValue, right->data.floatValue);
         return result;
     }
     else if (left->type == TYPE_INT && right->type == TYPE_FLOAT) {
-        result->type = TYPE_INT;
         evaluate_op_binary_int(node->type, result, left->data.intValue, (int)right->data.floatValue);
         return result;
     }
     else if (left->type == TYPE_FLOAT && right->type == TYPE_INT) {
-        result->type = TYPE_FLOAT;
         evaluate_op_binary_float(node->type, result, left->data.floatValue, (double)right->data.intValue);
+        return result;
+    }
+    else if (left->type == TYPE_BOOL && right->type == TYPE_BOOL) {
+        evaluate_op_binary_int(node->type, result, left->data.intValue, right->data.intValue);
         return result;
     }
     else {
@@ -305,9 +327,16 @@ Value *evaluate_op_binary(ParseNode *node) {
 
 Value *evaluate_op_eq(ParseNode *node) { // TODO: add string support
     Value *eq = malloc(sizeof(Value));
-    eq->type = TYPE_INT;
+    eq->type = TYPE_BOOL;
     eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
     return eq;
+}
+
+Value *evaluate_op_not(ParseNode *node) {
+    Value *not = malloc(sizeof(Value));
+    not->type = TYPE_BOOL;
+    not->data.intValue = !evaluate(node->left)->data.intValue;
+    return not;
 }
 
 Value *evaluate_if(ParseNode *node) {

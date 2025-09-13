@@ -4,7 +4,8 @@ int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV ||
            type == OP_GT || type == OP_GTE || type == OP_LT || type == OP_LTE ||
            type == OP_EQ || type == OP_DOT || type == OP_ADD_EQUALS || 
-           type == OP_SUB_EQUALS || type == OP_MUL_EQUALS || type == OP_DIV_EQUALS;
+           type == OP_SUB_EQUALS || type == OP_MUL_EQUALS || type == OP_DIV_EQUALS ||
+           type == OP_AND || type == OP_OR;
 }
 
 int is_compound_assignment_operator(TokenType type) {
@@ -74,7 +75,10 @@ void print_ast(ParseNode *node) {
             else if (node->value.type == TYPE_FLOAT) {
                 printf("%.2f", node->value.data.floatValue);
             } 
-            else {
+            else if (node->value.type == TYPE_BOOL) {
+                printf("%d", node->value.data.intValue);
+            } 
+            else if (node->value.data.stringValue != NULL){
                 printf("%s", node->value.data.stringValue);
             }
             break;

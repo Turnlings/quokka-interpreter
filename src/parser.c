@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include "token.h"
 
 ParseNode *parse_expression();
@@ -106,6 +107,16 @@ ParseNode *parse_literal() {
         node->value.data.stringValue = current_t.text;
         advance();
         return node;
+    } else if (match(TRUE) || match(FALSE)) {
+        ParseNode *node = parse_node_create(LITERAL);
+        node->value.type = TYPE_BOOL;
+        if (match(TRUE)) {
+            node->value.data.intValue = 1;
+        } else {
+            node->value.data.intValue = 0;
+        }
+        advance();
+        return node;
     } else {
         syntax_error("Expected Literal");
         return NULL;
@@ -113,7 +124,13 @@ ParseNode *parse_literal() {
 }
 
 ParseNode *parse_term() {
-    if (match(IDENTIFIER)) {
+    if (match(OP_NOT)) {
+        advance();
+        ParseNode *not = parse_node_create(OP_NOT);
+        not->left = parse_term();
+        return not;
+    }
+    else if (match(IDENTIFIER)) {
         return parse_identifier();
     }
     return parse_literal();
@@ -224,7 +241,7 @@ ParseNode *parse_increment_operator() {
     right->value.data.intValue = 1;
 
     ParseNode *identifier_copy = parse_node_create(IDENTIFIER);
-    identifier_copy->value.data.stringValue = identifier->value.data.stringValue;
+    identifier_copy->value.data.stringValue = strdup(identifier->value.data.stringValue);
 
     assignment->left = identifier;
     assignment->right = operator;

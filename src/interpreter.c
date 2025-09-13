@@ -25,7 +25,9 @@ int main() {
 
         // Parsing
         ParseNode *ast = parse(tokens, token_count);
-        if (ast == NULL) {
+        if (ast != NULL) {
+            printf("Parsing Successful\n");
+        } else {
             fprintf(stderr, "Parsing failed\n");
         }
 

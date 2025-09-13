@@ -28,6 +28,10 @@ typedef enum {
     OP_DOT,
     ASSIGNMENT,
 
+    // Logical states and operators
+    TRUE, FALSE,
+    OP_AND, OP_OR, OP_NOT,
+
     // Literals
     RETURN,
     LITERAL,
@@ -73,6 +77,7 @@ typedef enum {
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
+    TYPE_BOOL,
     TYPE_FUNCTION,
     TYPE_CLASS,
     TYPE_OBJECT

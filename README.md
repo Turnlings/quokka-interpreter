@@ -24,8 +24,6 @@ For examples, see the [docs](docs/FEATURES.md).
 
 ### Planned
 
-- Logical Operators
-- Unary Operators
 - Arrays/Lists
 - Import/Include Statements
 - Error Handling
