@@ -30,8 +30,8 @@ Token* tokenize(char *input, int *max_token_count) {
         start = current; // mark start of token
         char c = advance();
         switch (c) {
-            case '+': add_token(match('=') ? OP_ADD_EQUALS : OP_ADD); break;
-            case '-': add_token(match('=') ? OP_SUB_EQUALS : OP_SUB); break;
+            case '+': add_token(match('=') ? OP_ADD_EQUALS : match('+') ? OP_ADD_ADD : OP_ADD); break;
+            case '-': add_token(match('=') ? OP_SUB_EQUALS : match('-') ? OP_SUB_SUB : OP_SUB); break;
             case '*': add_token(match('=') ? OP_MUL_EQUALS : OP_MUL); break;
             case '/':     
                 if (match('/')) {

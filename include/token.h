@@ -14,8 +14,8 @@ typedef enum {
     SEPERATOR,
 
     // Arithmetic operators
-    OP_ADD, OP_ADD_EQUALS,
-    OP_SUB, OP_SUB_EQUALS,
+    OP_ADD, OP_ADD_EQUALS, OP_ADD_ADD,
+    OP_SUB, OP_SUB_EQUALS, OP_SUB_SUB,
     OP_MUL, OP_MUL_EQUALS,
     OP_DIV, OP_DIV_EQUALS,
 

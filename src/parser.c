@@ -35,6 +35,10 @@ static Token peek() {
     return input_tokens[position + 1];
 }
 
+static bool peek_match(TokenType match) {
+    return input_tokens[position + 1].category == match;
+}
+
 static void expect(TokenType expected) {
     if (current_t.category == expected) {
         advance();
@@ -205,6 +209,34 @@ ParseNode *parse_assignment() {
     }
 }
 
+/**
+ * @brief Convert x++ to x+=1
+ */
+ParseNode *parse_increment_operator() {
+    ParseNode* identifier = parse_identifier();
+    ParseNode *assignment = parse_node_create(ASSIGNMENT);
+    TokenType operator_type = current_t.category - 2;
+    ParseNode *operator = parse_node_create(operator_type);
+    advance();
+
+    ParseNode* right = parse_node_create(LITERAL);
+    right->value.type = TYPE_INT;
+    right->value.data.intValue = 1;
+
+    ParseNode *identifier_copy = parse_node_create(IDENTIFIER);
+    identifier_copy->value.data.stringValue = identifier->value.data.stringValue;
+
+    assignment->left = identifier;
+    assignment->right = operator;
+    operator->left = identifier_copy;
+    operator->right = right;
+
+    return assignment;
+}
+
+/**
+ * @brief Converts input like x += 1 to x = x + 1
+ */
 ParseNode *parse_compound_assignment_operator() {
     ParseNode* identifier = parse_identifier();
     ParseNode *assignment = parse_node_create(ASSIGNMENT);
@@ -292,6 +324,8 @@ ParseNode *parse_expression() {
         return parse_out();
     } else if (match(IN)) {
         return parse_in();
+    } else if (peek_match(OP_ADD_ADD) || peek_match(OP_SUB_SUB)) {
+        return parse_increment_operator();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
     } else if (is_operator(peek().category)) { // Operator
