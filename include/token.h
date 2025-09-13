@@ -14,10 +14,10 @@ typedef enum {
     SEPERATOR,
 
     // Arithmetic operators
-    OP_ADD,
-    OP_SUB,
-    OP_MUL,
-    OP_DIV,
+    OP_ADD, OP_ADD_EQUALS,
+    OP_SUB, OP_SUB_EQUALS,
+    OP_MUL, OP_MUL_EQUALS,
+    OP_DIV, OP_DIV_EQUALS,
 
     // Comparison operators
     OP_GT, OP_GTE,
@@ -67,6 +67,7 @@ typedef enum {
 } TokenType;
 
 int is_operator(TokenType type);
+int is_compound_assignment_operator(TokenType type);
 
 typedef enum {
     TYPE_INT,

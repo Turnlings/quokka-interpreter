@@ -205,6 +205,25 @@ ParseNode *parse_assignment() {
     }
 }
 
+ParseNode *parse_compound_assignment_operator() {
+    ParseNode* identifier = parse_identifier();
+    ParseNode *assignment = parse_node_create(ASSIGNMENT);
+    TokenType operator_type = current_t.category - 1;
+    ParseNode *operator = parse_node_create(operator_type);
+    advance();
+    ParseNode* right = parse_expression();
+
+    ParseNode *identifier_copy = parse_node_create(IDENTIFIER);
+    identifier_copy->value.data.stringValue = identifier->value.data.stringValue;
+
+    assignment->left = identifier;
+    assignment->right = operator;
+    operator->left = identifier_copy;
+    operator->right = right;
+
+    return assignment;
+}
+
 ParseNode *parse_operator() {
     if (is_operator(current_t.category)) {
         ParseNode *node = parse_node_create(current_t.category);
@@ -273,6 +292,8 @@ ParseNode *parse_expression() {
         return parse_out();
     } else if (match(IN)) {
         return parse_in();
+    } else if (is_compound_assignment_operator(peek().category)) {
+        return parse_compound_assignment_operator();
     } else if (is_operator(peek().category)) { // Operator
         ParseNode* left = parse_term();
         ParseNode* operator = parse_operator();
