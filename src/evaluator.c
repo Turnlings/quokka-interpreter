@@ -69,6 +69,7 @@ Value *evaluate(ParseNode *node) {
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
+        case OP_MOD:
         case OP_GT:
         case OP_GTE:
         case OP_LT:
@@ -232,7 +233,7 @@ Value *evaluate_op_add(ParseNode *node) {
 
 Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right) {
     switch (type) {
-        case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV:
+        case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_MOD:
             result->type = TYPE_INT;
             break;
         default:
@@ -247,6 +248,8 @@ Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right
             result->data.intValue = left * right; break;
         case OP_DIV:
             result->data.intValue = left / right; break;
+        case OP_MOD:
+            result->data.intValue = left % right; break;
         case OP_GT:
             result->data.intValue = left > right; break;
         case OP_GTE:
@@ -259,6 +262,8 @@ Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right
             result->data.intValue = left && right; break;
         case OP_OR:
             result->data.intValue = left || right; break;
+        default:
+            runtime_error("Operator not supported on integers");
     }
 
     return result;
@@ -289,6 +294,8 @@ Value *evaluate_op_binary_float(TokenType type, Value *result, double left, doub
             result->data.intValue = left < right; break;
         case OP_LTE:
             result->data.intValue = left <= right; break;
+        default:
+            runtime_error("Operator not supported on floats");
     }
 
     return result;

@@ -1,16 +1,17 @@
 #include "token.h"
 
 int is_operator(TokenType type) {
-    return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV ||
+    return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_MOD ||
            type == OP_GT || type == OP_GTE || type == OP_LT || type == OP_LTE ||
            type == OP_EQ || type == OP_DOT || type == OP_ADD_EQUALS || 
-           type == OP_SUB_EQUALS || type == OP_MUL_EQUALS || type == OP_DIV_EQUALS ||
+           type == OP_SUB_EQUALS || type == OP_MUL_EQUALS || type == OP_DIV_EQUALS || type == OP_MOD_EQUALS ||
            type == OP_AND || type == OP_OR;
 }
 
 int is_compound_assignment_operator(TokenType type) {
     return type == OP_ADD_EQUALS || type == OP_SUB_EQUALS || 
-           type == OP_MUL_EQUALS || type == OP_DIV_EQUALS;
+           type == OP_MUL_EQUALS || type == OP_DIV_EQUALS || 
+           type == OP_MOD_EQUALS;
 }
 
 ParseNode *parse_node_create(TokenType type){

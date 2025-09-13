@@ -41,6 +41,7 @@ Token* tokenize(char *input, int *max_token_count) {
                     add_token(match('=') ? OP_DIV_EQUALS : OP_DIV);
                 } 
                 break;
+            case '%': add_token(OP_MOD); break; 
 
             case '&':
                 if (match('&')) {

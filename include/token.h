@@ -18,6 +18,7 @@ typedef enum {
     OP_SUB, OP_SUB_EQUALS, OP_SUB_SUB,
     OP_MUL, OP_MUL_EQUALS,
     OP_DIV, OP_DIV_EQUALS,
+    OP_MOD, OP_MOD_EQUALS,
 
     // Comparison operators
     OP_GT, OP_GTE,
