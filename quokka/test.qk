@@ -1,3 +1,13 @@
-a = 5;
+class Thing() {
+    def foo(a, b) => {
+        a + bar(b);
+    };
 
-a % 3;
+    def bar(x) => {
+        x * 2;
+    };
+};
+
+thing = Thing();
+
+thing.foo(3,2);

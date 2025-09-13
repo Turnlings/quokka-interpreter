@@ -7,7 +7,7 @@
 #define MAX_FRAMES 32
 
 typedef struct StackFrame {
-    ParseNode *return_address;
+    char *caller;
     HashTable *local_variables;
     int status;
 } StackFrame;
@@ -17,10 +17,10 @@ typedef struct CallStack {
     int top;
 } CallStack;
 
-StackFrame* frame_create() {
+StackFrame* frame_create(char *name) {
     StackFrame* frame = malloc(sizeof(StackFrame));
     if (!frame) return NULL;
-    frame->return_address = NULL;
+    frame->caller = name;
     frame->local_variables = hashtable_create(32);
     frame->status = 0;
     return frame;
@@ -86,4 +86,11 @@ void stack_destroy(CallStack *stack) {
 
     free(stack->frames);
     free(stack);
+}
+
+void stack_print(CallStack *stack) {
+    for (int i = stack->top; i >= 0; i--) {
+        printf("%s <- ", stack->frames[i]->caller);
+    }
+    printf("\n");
 }

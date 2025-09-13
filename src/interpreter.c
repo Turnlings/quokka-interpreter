@@ -17,7 +17,9 @@ int main() {
         // Tokenisation
         int token_count = MAX_TOKEN_COUNT;
         Token *tokens = tokenize(input, &token_count);
-        if (tokens == NULL) {
+        if (tokens != NULL) {
+            printf("Tokenisation Successful\n");
+        } else {
             fprintf(stderr, "Tokenisation failed\n");
         }
 
@@ -26,9 +28,9 @@ int main() {
         // Parsing
         ParseNode *ast = parse(tokens, token_count);
         if (ast != NULL) {
-            printf("Parsing Successful\n");
+            printf("\nParsing Successful\n");
         } else {
-            fprintf(stderr, "Parsing failed\n");
+            fprintf(stderr, "\nParsing failed\n");
         }
 
         // Debug check parsing
@@ -41,13 +43,13 @@ int main() {
         }
 
         if (return_value->type == TYPE_INT) {
-            printf("Evaluation Return Value: %d\n", return_value->data.intValue);
+            printf("\nEvaluation Return Value: %d\n", return_value->data.intValue);
         }
         if (return_value->type == TYPE_FLOAT) {
-            printf("Evaluation Return Value: %f\n", return_value->data.floatValue);
+            printf("\nEvaluation Return Value: %f\n", return_value->data.floatValue);
         }
         else if (return_value->type == TYPE_STRING) {
-            printf("Evaluation Return Value: %s\n", return_value->data.stringValue);
+            printf("\nEvaluation Return Value: %s\n", return_value->data.stringValue);
         }
         
         free_ast(ast);

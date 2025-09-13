@@ -5,7 +5,7 @@
 #include "token.h"
 
 typedef struct StackFrame {
-    ParseNode *return_address;
+    char *caller;
     HashTable *local_variables;
     int status;
 } StackFrame;
@@ -15,7 +15,7 @@ typedef struct CallStack {
     int top;
 } CallStack;
 
-StackFrame* frame_create();
+StackFrame* frame_create(char *name);
 void frame_destroy(StackFrame *frame, int destroy_hashtable);
 
 void stack_init(CallStack *stack);
@@ -24,5 +24,7 @@ StackFrame *stack_pop(CallStack *stack);
 StackFrame *stack_peek(CallStack *stack);
 int stack_get_value(CallStack *stack, const char *key, Value *out_value);
 void stack_destroy(CallStack *stack);
+
+void stack_print(CallStack *stack);
 
 #endif

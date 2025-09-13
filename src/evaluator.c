@@ -27,7 +27,7 @@ Value *evaluate_out(ParseNode *node);
 Value *evaluate_in(ParseNode *node);
 Value *evaluate_return(ParseNode *node);
 
-void runtime_error(char* string);
+void runtime_error(ParseNode *node,char* string);
 void cleanup();
 
 CallStack *callStack = NULL;
@@ -42,7 +42,7 @@ Value *evaluate(ParseNode *node) {
         callStack = malloc(sizeof(CallStack));
         stack_init(callStack);
 
-        StackFrame* main = frame_create();
+        StackFrame* main = frame_create("main");
         stack_push(callStack, main);
     }
     if (node == NULL) {
@@ -113,7 +113,7 @@ Value *evaluate_statement_list(ParseNode *node) {
 
 Value *evaluate_assignment(ParseNode *node) {
     if (!node->left || !node->left->value.data.stringValue) {
-        fprintf(stderr, "Invalid assignment target\n");
+        runtime_error(node, "Invalid assignment target");
         return NULL;
     }
     Value *value = evaluate(node->right);
@@ -128,7 +128,7 @@ Value *evaluate_set(ParseNode *node) {
     Value *object = malloc(sizeof(Value));
     int found_object = stack_get_value(callStack, "self", object);
     if (found_object == 0) {
-        runtime_error("Set used but no class to reference");
+        runtime_error(node, "Set used but no class to reference");
         cleanup();
         exit(1);
     }
@@ -160,7 +160,7 @@ Value *evaluate_identifier(ParseNode *node) {
     Value *id_value = malloc(sizeof(Value));
     int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
     if (found == 0) {
-        fprintf(stderr, "Error: %s not yet declared.\n", node->value.data.stringValue);
+        runtime_error(node, "Identifier not yet declared");
         cleanup();
         exit(1);
     }
@@ -214,7 +214,7 @@ Value *evaluate_op_add(ParseNode *node) {
         unsigned int len_right = strlen(right->data.stringValue);
         char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
         if (!concat) {
-            runtime_error("Malloc Failed");
+            runtime_error(node, "Malloc Failed");
             cleanup();
             exit(1);
         }
@@ -224,22 +224,22 @@ Value *evaluate_op_add(ParseNode *node) {
         result->data.stringValue = concat;
     } 
     else {
-        runtime_error("Incompatible types for OP_ADD");
+        runtime_error(node, "Incompatible types for OP_ADD");
         free(result);
         return NULL;
     }
     return result;
 }
 
-Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right) {
-    switch (type) {
+Value *evaluate_op_binary_int(ParseNode *node, Value *result, int left, int right) {
+    switch (node->type) {
         case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_MOD:
             result->type = TYPE_INT;
             break;
         default:
             result->type = TYPE_BOOL;
     }
-    switch (type) {
+    switch (node->type) {
         case OP_ADD:
             result->data.intValue = left + right; break;
         case OP_SUB:
@@ -263,21 +263,21 @@ Value *evaluate_op_binary_int(TokenType type, Value *result, int left, int right
         case OP_OR:
             result->data.intValue = left || right; break;
         default:
-            runtime_error("Operator not supported on integers");
+            runtime_error(node, "Operator not supported on integers");
     }
 
     return result;
 }
 
-Value *evaluate_op_binary_float(TokenType type, Value *result, double left, double right) {
-    switch (type) {
+Value *evaluate_op_binary_float(ParseNode *node, Value *result, double left, double right) {
+    switch (node->type) {
         case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV:
             result->type = TYPE_FLOAT;
             break;
         default:
             result->type = TYPE_BOOL;
     }
-    switch (type) {
+    switch (node->type) {
         case OP_ADD:
             result->data.floatValue = left + right; break;
         case OP_SUB:
@@ -295,7 +295,7 @@ Value *evaluate_op_binary_float(TokenType type, Value *result, double left, doub
         case OP_LTE:
             result->data.intValue = left <= right; break;
         default:
-            runtime_error("Operator not supported on floats");
+            runtime_error(node, "Operator not supported on floats");
     }
 
     return result;
@@ -307,27 +307,27 @@ Value *evaluate_op_binary(ParseNode *node) {
     Value *result = malloc(sizeof(Value));
 
     if (left->type == TYPE_INT && right->type == TYPE_INT) {
-        evaluate_op_binary_int(node->type, result, left->data.intValue, right->data.intValue);
+        evaluate_op_binary_int(node, result, left->data.intValue, right->data.intValue);
         return result;
     }
     else if (left->type == TYPE_FLOAT && right->type == TYPE_FLOAT) {
-        evaluate_op_binary_float(node->type, result, left->data.floatValue, right->data.floatValue);
+        evaluate_op_binary_float(node, result, left->data.floatValue, right->data.floatValue);
         return result;
     }
     else if (left->type == TYPE_INT && right->type == TYPE_FLOAT) {
-        evaluate_op_binary_int(node->type, result, left->data.intValue, (int)right->data.floatValue);
+        evaluate_op_binary_int(node, result, left->data.intValue, (int)right->data.floatValue);
         return result;
     }
     else if (left->type == TYPE_FLOAT && right->type == TYPE_INT) {
-        evaluate_op_binary_float(node->type, result, left->data.floatValue, (double)right->data.intValue);
+        evaluate_op_binary_float(node, result, left->data.floatValue, (double)right->data.intValue);
         return result;
     }
     else if (left->type == TYPE_BOOL && right->type == TYPE_BOOL) {
-        evaluate_op_binary_int(node->type, result, left->data.intValue, right->data.intValue);
+        evaluate_op_binary_int(node, result, left->data.intValue, right->data.intValue);
         return result;
     }
     else {
-        runtime_error("Incompatible types for OPERATOR");
+        runtime_error(node, "Incompatible types for OPERATOR");
         return NULL;
     }
 }
@@ -369,7 +369,7 @@ Value *evaluate_out(ParseNode *node) {
             printf("%s\n",to_out->data.stringValue);
             break;
         default:
-            runtime_error("Invalid Output Type");
+            runtime_error(node, "Invalid Output Type");
     }
     return to_out;
 }
@@ -383,7 +383,7 @@ Value *evaluate_in(ParseNode *node) {
     nread = getline(&line, &len, stdin);
 
     if (nread == -1) {
-        runtime_error("Failed to read value");
+        runtime_error(node, "Failed to read value");
     }
 
     // Remove the newline character
@@ -405,7 +405,7 @@ Value *evaluate_return(ParseNode *node) {
 
 Value *execute_function(ParseNode *node, Value *id_value) {
     // Create new stack frame for function call
-    StackFrame* frame = frame_create();
+    StackFrame* frame = frame_create(node->value.data.stringValue);
 
     // Get the param and arg
     ParseNode *param = id_value->data.node->left->right;
@@ -417,8 +417,6 @@ Value *execute_function(ParseNode *node, Value *id_value) {
         hashtable_set(frame->local_variables, 
                     param->value.data.stringValue, 
                     value);
-
-        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value->data.intValue);
 
         param = param->right;
         arg = arg->right;
@@ -452,14 +450,12 @@ Value *build_object(ParseNode *node, Value *class) {
                     param->value.data.stringValue, 
                     value);
 
-        printf("Param: %s\nArg: %d\n", param->value.data.stringValue, value->data.intValue);
-
         param = param->right;
         arg = arg->right;
     }
 
     // Create a frame that will be auto filled with the object fields
-    StackFrame *frame = frame_create();
+    StackFrame *frame = frame_create(node->value.data.stringValue);
     frame->local_variables = local_variables;
 
     stack_push(callStack, frame);
@@ -472,16 +468,14 @@ Value *build_object(ParseNode *node, Value *class) {
 
     hashtable_set(local_variables, "self", obj);
 
-    printf("Object built\n");
     return obj;
 }
 
 Value *call_object(ParseNode *node) {
-    printf("Object called\n");
 
     Value *obj = evaluate(node->left);
     if (!obj || obj->type != TYPE_OBJECT) {
-        runtime_error("Dot operator on non-object");
+        runtime_error(node, "Dot operator on non-object");
         return NULL;
     }
 
@@ -489,13 +483,12 @@ Value *call_object(ParseNode *node) {
     Value *member = malloc(sizeof(Value));
     int found = hashtable_get(obj->data.object_fields, node->right->value.data.stringValue, member);
     if (!found) {
-        fprintf(stderr, "Object has no member '%s'\n", node->right->value.data.stringValue);
-        return NULL;
+        runtime_error(node, "Invalid member for object");
     }
 
     switch (member->type) {
         case TYPE_FUNCTION:
-            StackFrame* frame = frame_create();
+            StackFrame* frame = frame_create(node->value.data.stringValue);
             frame->local_variables = obj->data.object_fields;
             stack_push(callStack, frame);
 
@@ -510,8 +503,10 @@ Value *call_object(ParseNode *node) {
     }
 }
 
-void runtime_error(char* string) {
-    printf("Runtime Error: %s\n", string);
+void runtime_error(ParseNode *node, char* string) {
+    printf("\nRuntime Error: %s on line %d.\nCallstack:\n", string, node->line);
+    stack_print(callStack);
+
 }
 
 void cleanup() {

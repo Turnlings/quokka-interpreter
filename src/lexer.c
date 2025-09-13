@@ -12,6 +12,7 @@ static char peek();
 static bool match(char c);
 
 int start = 0, current = 0;
+int line = 1;
 
 Token *tokens;
 int token_count;
@@ -73,6 +74,7 @@ Token* tokenize(char *input, int *max_token_count) {
             case '}': add_token(BRACES_R); break;
             case ',': add_token(COMMA); break;
             case '"': string(); break;
+            case '\n': line++; break;
             default:
                 if (isDigit(c)) {
                     number();
@@ -94,12 +96,14 @@ static char peek() {
 void add_token(TokenType type) {
     tokens[token_count].category = type;
     tokens[token_count].text = substring(source, start, current - 1);
+    tokens[token_count].line = line;
     token_count++;
 }
 
 void add_token_string(TokenType type, char* text) {
     tokens[token_count].category = type;
     tokens[token_count].text = text;
+    tokens[token_count].line = line;
     token_count++;
 }
 

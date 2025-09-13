@@ -100,6 +100,7 @@ typedef struct Value {
 typedef struct Token {
     TokenType category;
     char *text;
+    int line;
 } Token;
 
 struct ParseNode {
@@ -107,6 +108,7 @@ struct ParseNode {
     Value value;
     struct ParseNode *left;
     struct ParseNode *right;
+    int line;
 };
 
 ParseNode *parse_node_create(TokenType type);

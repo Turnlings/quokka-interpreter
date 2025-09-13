@@ -7,6 +7,7 @@
 ParseNode *parse_expression();
 ParseNode *parse_block();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
+ParseNode *create_node(TokenType type);
 
 Token* input_tokens;
 int position;
@@ -14,12 +15,12 @@ Token current_t;
 int count;
 
 void syntax_error(char* string) {
-    printf("Syntax Error: %s at token %d\n", string, position);
+    printf("\nSyntax Error: %s on line %d\n", string, input_tokens[position].line);
     if (position - 1 >= 0) {
         printf("%s ", input_tokens[position - 1].text);
     }
     if (position < count) {
-        printf("%s ", input_tokens[position].text);
+        printf("_%s_ ", input_tokens[position].text);
     }
     if (position + 1 < count) {
         printf("%s ", input_tokens[position + 1].text);
@@ -68,7 +69,7 @@ ParseNode *parse_args() {
 
 ParseNode *parse_identifier() {
     if (match(IDENTIFIER)) {
-        ParseNode *node = parse_node_create(IDENTIFIER);
+        ParseNode *node = create_node(IDENTIFIER);
         node->value.data.stringValue = current_t.text;
         advance();
 
@@ -85,13 +86,13 @@ ParseNode *parse_identifier() {
 
 ParseNode *parse_literal() {
     if (match(LITERAL)) {
-        ParseNode *node = parse_node_create(LITERAL);
+        ParseNode *node = create_node(LITERAL);
         node->value.type = TYPE_INT;
         node->value.data.intValue = atoi(current_t.text);
         advance();
         return node;
     } else if (match(FLOAT)) {
-        ParseNode *node = parse_node_create(LITERAL);
+        ParseNode *node = create_node(LITERAL);
         node->value.type = TYPE_FLOAT;
         char *end;
         double d = strtod(current_t.text, &end);
@@ -102,13 +103,13 @@ ParseNode *parse_literal() {
         advance();
         return node;
     } else if (match(STRING)) {
-        ParseNode *node = parse_node_create(LITERAL);
+        ParseNode *node = create_node(LITERAL);
         node->value.type = TYPE_STRING;
         node->value.data.stringValue = current_t.text;
         advance();
         return node;
     } else if (match(TRUE) || match(FALSE)) {
-        ParseNode *node = parse_node_create(LITERAL);
+        ParseNode *node = create_node(LITERAL);
         node->value.type = TYPE_BOOL;
         if (match(TRUE)) {
             node->value.data.intValue = 1;
@@ -126,7 +127,7 @@ ParseNode *parse_literal() {
 ParseNode *parse_term() {
     if (match(OP_NOT)) {
         advance();
-        ParseNode *not = parse_node_create(OP_NOT);
+        ParseNode *not = create_node(OP_NOT);
         not->left = parse_term();
         return not;
     }
@@ -141,7 +142,7 @@ ParseNode *parse_while() {
     ParseNode *condition = parse_expression();
     expect(DO);
     ParseNode *body = parse_block();
-    ParseNode *node = parse_node_create(WHILE);
+    ParseNode *node = create_node(WHILE);
     node->left = condition;
     node->right = body;
     return node;
@@ -157,9 +158,9 @@ ParseNode *parse_for() {
     expect(SEPERATOR);
     ParseNode *body = parse_block();
 
-    ParseNode *node = parse_node_create(FOR);
-    ParseNode *control_p = parse_node_create(CONTROL);
-    ParseNode *control_c = parse_node_create(CONTROL);
+    ParseNode *node = create_node(FOR);
+    ParseNode *control_p = create_node(CONTROL);
+    ParseNode *control_c = create_node(CONTROL);
 
     node->left = control_p;
     control_p->left = initialise;
@@ -183,11 +184,11 @@ ParseNode *parse_if() {
         else_block = parse_block();
     }
 
-    ParseNode *options = parse_node_create(DO);
+    ParseNode *options = create_node(DO);
     options->left = body;
     options->right = else_block;
 
-    ParseNode *if_statement = parse_node_create(IF);
+    ParseNode *if_statement = create_node(IF);
     if_statement->left = condition;
     if_statement->right = options;
 
@@ -199,7 +200,7 @@ ParseNode *parse_class_definition() {
     ParseNode *identifier = parse_identifier();
     ParseNode *body = parse_block();
 
-    ParseNode *node = parse_node_create(CLASS);
+    ParseNode *node = create_node(CLASS);
     node->left = identifier;
     node->right = body;
     return node;
@@ -211,7 +212,7 @@ ParseNode *parse_function_definition() {
     expect(FUNCTION);
     ParseNode *body = parse_block();
 
-    ParseNode *node = parse_node_create(FUNCTION);
+    ParseNode *node = create_node(FUNCTION);
     node->left = identifier;
     node->right = body;
     return node;
@@ -219,7 +220,7 @@ ParseNode *parse_function_definition() {
 
 ParseNode *parse_assignment() {
     if (match(ASSIGNMENT)) {
-        ParseNode *node = parse_node_create(ASSIGNMENT);
+        ParseNode *node = create_node(ASSIGNMENT);
         node->value.data.stringValue = strdup(current_t.text);
         advance();
         return node;
@@ -231,16 +232,16 @@ ParseNode *parse_assignment() {
  */
 ParseNode *parse_increment_operator() {
     ParseNode* identifier = parse_identifier();
-    ParseNode *assignment = parse_node_create(ASSIGNMENT);
+    ParseNode *assignment = create_node(ASSIGNMENT);
     TokenType operator_type = current_t.category - 2;
-    ParseNode *operator = parse_node_create(operator_type);
+    ParseNode *operator = create_node(operator_type);
     advance();
 
-    ParseNode* right = parse_node_create(LITERAL);
+    ParseNode* right = create_node(LITERAL);
     right->value.type = TYPE_INT;
     right->value.data.intValue = 1;
 
-    ParseNode *identifier_copy = parse_node_create(IDENTIFIER);
+    ParseNode *identifier_copy = create_node(IDENTIFIER);
     identifier_copy->value.data.stringValue = strdup(identifier->value.data.stringValue);
 
     assignment->left = identifier;
@@ -256,13 +257,13 @@ ParseNode *parse_increment_operator() {
  */
 ParseNode *parse_compound_assignment_operator() {
     ParseNode* identifier = parse_identifier();
-    ParseNode *assignment = parse_node_create(ASSIGNMENT);
+    ParseNode *assignment = create_node(ASSIGNMENT);
     TokenType operator_type = current_t.category - 1;
-    ParseNode *operator = parse_node_create(operator_type);
+    ParseNode *operator = create_node(operator_type);
     advance();
     ParseNode* right = parse_expression();
 
-    ParseNode *identifier_copy = parse_node_create(IDENTIFIER);
+    ParseNode *identifier_copy = create_node(IDENTIFIER);
     identifier_copy->value.data.stringValue = identifier->value.data.stringValue;
 
     assignment->left = identifier;
@@ -275,7 +276,7 @@ ParseNode *parse_compound_assignment_operator() {
 
 ParseNode *parse_operator() {
     if (is_operator(current_t.category)) {
-        ParseNode *node = parse_node_create(current_t.category);
+        ParseNode *node = create_node(current_t.category);
         node->value.data.stringValue = current_t.text;
         advance();
         return node;
@@ -287,7 +288,7 @@ ParseNode *parse_operator() {
 
 ParseNode *parse_return() {
     expect(RETURN);
-    ParseNode *node = parse_node_create(RETURN);
+    ParseNode *node = create_node(RETURN);
     ParseNode* left = parse_expression();
     node->left = left;
     return node;
@@ -295,7 +296,7 @@ ParseNode *parse_return() {
 
 ParseNode *parse_out() {
     expect(OUT);
-    ParseNode *node = parse_node_create(OUT);
+    ParseNode *node = create_node(OUT);
     ParseNode* left = parse_expression();
     node->left = left;
     return node;
@@ -303,7 +304,7 @@ ParseNode *parse_out() {
 
 ParseNode *parse_in() {
     expect(IN);
-    return parse_node_create(IN);
+    return create_node(IN);
 }
 
 ParseNode *parse_expression() {
@@ -317,7 +318,7 @@ ParseNode *parse_expression() {
         expect(ASSIGNMENT);
         ParseNode* right = parse_expression();
 
-        ParseNode* set = parse_node_create(SET);
+        ParseNode* set = create_node(SET);
         set->left = left;
         set->right = right;
 
@@ -375,9 +376,9 @@ ParseNode *add_child(ParseNode *parent, ParseNode *child) {
 ParseNode *parse_block() {
     if(match(BRACES_L)) { // TODO: can this replace parts of parse_program?
         expect(BRACES_L);
-        ParseNode *root = parse_node_create(STATEMENT_LIST);
+        ParseNode *root = create_node(STATEMENT_LIST);
         while (!match(BRACES_R)) {
-            ParseNode *node = parse_node_create(STATEMENT_LIST);
+            ParseNode *node = create_node(STATEMENT_LIST);
             ParseNode *expr = parse_expression();
             node->left = expr;
             root = add_child(root, node);
@@ -396,10 +397,10 @@ ParseNode *parse_block() {
 }
 
 ParseNode *parse_program() {
-    ParseNode *root = parse_node_create(PROGRAM);
+    ParseNode *root = create_node(PROGRAM);
 
     while (position < count) {
-        ParseNode *node = parse_node_create(STATEMENT_LIST);
+        ParseNode *node = create_node(STATEMENT_LIST);
         ParseNode *expr = parse_expression();
         node->left = expr;
         root = add_child(root, node);
@@ -421,4 +422,10 @@ ParseNode *parse(Token *input, int size) {
     current_t = input_tokens[position];
 
     return parse_program();
+}
+
+ParseNode *create_node(TokenType type) {
+    ParseNode *node = parse_node_create(type);
+    node->line = current_t.line;
+    return node;
 }
