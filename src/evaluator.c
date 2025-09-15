@@ -178,7 +178,7 @@ Value *evaluate_identifier(ParseNode *node) {
 
 Value *evaluate_while(ParseNode *node) {
     Value *value = NULL;
-    while (evaluate(node->left)) {
+    while (evaluate(node->left)->data.intValue) {
         value = evaluate(node->right);
     }
     return value;
