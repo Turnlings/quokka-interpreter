@@ -2,4 +2,4 @@ def lemonade(a, b) => {
     a + b;
 };
 
-lemonade(7, 6);
+lemonade("Hello", 6);
