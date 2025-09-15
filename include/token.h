@@ -23,7 +23,7 @@ typedef enum {
     // Comparison operators
     OP_GT, OP_GTE,
     OP_LT, OP_LTE,
-    OP_EQ,
+    OP_EQ, OP_NEQ,
 
     // Other operators
     OP_DOT,

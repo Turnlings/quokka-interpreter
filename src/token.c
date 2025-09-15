@@ -3,7 +3,7 @@
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_MOD ||
            type == OP_GT || type == OP_GTE || type == OP_LT || type == OP_LTE ||
-           type == OP_EQ || type == OP_DOT || type == OP_ADD_EQUALS || 
+           type == OP_EQ || type == OP_NEQ || type == OP_DOT || type == OP_ADD_EQUALS || 
            type == OP_SUB_EQUALS || type == OP_MUL_EQUALS || type == OP_DIV_EQUALS || type == OP_MOD_EQUALS ||
            type == OP_AND || type == OP_OR;
 }
@@ -51,6 +51,7 @@ void print_binary_operator(ParseNode *node) {
         case OP_LT:  printf("<"); break;
         case OP_LTE: printf("<="); break;
         case OP_EQ:  printf("=="); break;
+        case OP_NEQ:  printf("!="); break;
         case ASSIGNMENT: printf("="); break;
     }
     printf(" ");
@@ -65,8 +66,8 @@ void print_ast(ParseNode *node) {
 
     switch (node->type) {
         case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_DOT:
-        case OP_GT: case OP_GTE: case OP_LT: case OP_LTE: case OP_EQ:
-        case ASSIGNMENT:
+        case OP_GT: case OP_GTE: case OP_LT: case OP_LTE: case OP_EQ: 
+        case OP_NEQ: case ASSIGNMENT:
             print_binary_operator(node);
             break;
         case LITERAL: case IDENTIFIER:

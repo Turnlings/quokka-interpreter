@@ -322,7 +322,7 @@ ParseNode *parse_addition() {
 ParseNode *parse_relation() {
     ParseNode *node = parse_addition();
 
-    while (match(OP_EQ) ||
+    while (match(OP_EQ) || match(OP_NEQ) ||
            match(OP_LT) || match(OP_LTE) ||
            match(OP_GT) || match(OP_GTE)) {
         TokenType op = current_t.category;

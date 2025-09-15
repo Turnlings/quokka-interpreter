@@ -21,6 +21,7 @@ Value *evaluate_literal(ParseNode *node);
 Value *evaluate_op_add(ParseNode *node);
 Value *evaluate_op_binary(ParseNode *node);
 Value *evaluate_op_eq(ParseNode *node);
+Value *evaluate_op_neq(ParseNode *node);
 Value *evaluate_op_not(ParseNode *node);
 Value *evaluate_if(ParseNode *node);
 Value *evaluate_out(ParseNode *node);
@@ -64,6 +65,7 @@ Value *evaluate(ParseNode *node) {
         case IN: return evaluate_in(node);
         case RETURN: return evaluate_return(node);
         case OP_EQ: return evaluate_op_eq(node);
+        case OP_NEQ: return evaluate_op_eq(node);
         case OP_DOT: return call_object(node);
         case OP_ADD: return evaluate_op_add(node);
         case OP_SUB:
@@ -337,6 +339,13 @@ Value *evaluate_op_eq(ParseNode *node) { // TODO: add string support
     eq->type = TYPE_BOOL;
     eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
     return eq;
+}
+
+Value *evaluate_op_neq(ParseNode *node) { // TODO: add string support
+    Value *neq = malloc(sizeof(Value));
+    neq->type = TYPE_BOOL;
+    neq->data.intValue = evaluate(node->left)->data.intValue != evaluate(node->right)->data.intValue;
+    return neq;
 }
 
 Value *evaluate_op_not(ParseNode *node) {

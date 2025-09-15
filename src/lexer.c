@@ -58,7 +58,7 @@ Token* tokenize(char *input, int *max_token_count) {
                     syntax_error("Unexpected single |");
                 }
                 break;
-            case '!': add_token(OP_NOT); break;
+            case '!': add_token(match('=') ? OP_NEQ : OP_NOT); break;
 
             case '>': add_token(match('=') ? OP_GTE : match('>') ? OUT : OP_GT); break;
             case '<': add_token(match('=') ? OP_LTE : match('<') ? IN : OP_LT); break;
