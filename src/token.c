@@ -51,7 +51,9 @@ void print_binary_operator(ParseNode *node) {
         case OP_LT:  printf("<"); break;
         case OP_LTE: printf("<="); break;
         case OP_EQ:  printf("=="); break;
-        case OP_NEQ:  printf("!="); break;
+        case OP_NEQ: printf("!="); break;
+        case OP_AND: printf("&&"); break;
+        case OP_OR:  printf("||"); break;
         case ASSIGNMENT: printf("="); break;
     }
     printf(" ");
@@ -67,7 +69,7 @@ void print_ast(ParseNode *node) {
     switch (node->type) {
         case OP_ADD: case OP_SUB: case OP_MUL: case OP_DIV: case OP_DOT:
         case OP_GT: case OP_GTE: case OP_LT: case OP_LTE: case OP_EQ: 
-        case OP_NEQ: case ASSIGNMENT:
+        case OP_NEQ: case ASSIGNMENT: case OP_AND: case OP_OR:
             print_binary_operator(node);
             break;
         case LITERAL: case IDENTIFIER:

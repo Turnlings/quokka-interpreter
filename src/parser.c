@@ -274,18 +274,6 @@ ParseNode *parse_compound_assignment_operator() {
     return assignment;
 }
 
-ParseNode *parse_operator() {
-    if (is_operator(current_t.category)) {
-        ParseNode *node = create_node(current_t.category);
-        node->value.data.stringValue = current_t.text;
-        advance();
-        return node;
-    } else {
-        syntax_error("Expected Operator");
-        return NULL;
-    }
-}
-
 ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right) {
     ParseNode *new_node = create_node(op);
     new_node->left = left;
@@ -328,6 +316,19 @@ ParseNode *parse_relation() {
         TokenType op = current_t.category;
         advance();
         ParseNode *right = parse_addition();
+
+        node = create_node_with_children(op, node, right);
+    }
+    return node;
+}
+
+ParseNode *parse_logical_operators() {
+    ParseNode *node = parse_relation();
+
+    while (match(OP_AND) || match(OP_OR)) {
+        TokenType op = current_t.category;
+        advance();
+        ParseNode *right = parse_relation();
 
         node = create_node_with_children(op, node, right);
     }
@@ -394,8 +395,8 @@ ParseNode *parse_expression() {
         return parse_increment_operator();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
-    } else if (is_operator(peek().category)) { // Operator
-        return parse_relation();
+    } else if (is_operator(peek().category)) { // All operators
+        return parse_logical_operators();
     } else if (match(RETURN)) {
         return parse_return();
     } else {

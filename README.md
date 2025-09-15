@@ -15,8 +15,8 @@ For examples, see the [docs](docs/FEATURES.md).
 
 ### Implemented
 
-- Dynamic Types (Integers, Floats and Strings)
-- Simple Arithmetic
+- Dynamic Types (Integers, Floats, Strings and Booleans)
+- Arithmetic and Comparators
 - Conditionals
 - While and For Loops
 - Functions
@@ -27,7 +27,6 @@ For examples, see the [docs](docs/FEATURES.md).
 - Arrays/Lists
 - Import/Include Statements
 - Error Handling
-- Better Error Messages
 - Standard Library
 
 ## Why Call It Quokka???
