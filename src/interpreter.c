@@ -42,7 +42,7 @@ int main() {
             fprintf(stderr, "Evaluation failed\n");
         }
 
-        if (return_value->type == TYPE_INT) {
+        if (return_value->type == TYPE_INT || return_value->type == TYPE_BOOL) {
             printf("\nEvaluation Return Value: %d\n", return_value->data.intValue);
         }
         if (return_value->type == TYPE_FLOAT) {

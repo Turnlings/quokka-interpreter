@@ -1,13 +1,1 @@
-class Thing() {
-    def foo(a, b) => {
-        a + bar(b);
-    };
-
-    def bar(x) => {
-        x * 2;
-    };
-};
-
-thing = Thing();
-
-thing.foo(3,2);
+2 + 3 * 4 < 10;

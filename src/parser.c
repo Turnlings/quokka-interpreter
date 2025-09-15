@@ -286,6 +286,54 @@ ParseNode *parse_operator() {
     }
 }
 
+ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right) {
+    ParseNode *new_node = create_node(op);
+    new_node->left = left;
+    new_node->right = right;
+    return new_node;
+}
+
+ParseNode *parse_multiply() {
+    ParseNode *node = parse_term();
+
+    while (match(OP_MUL) || match(OP_DIV)) {
+        TokenType op = current_t.category;
+        advance();
+        ParseNode *right = parse_term();
+
+        node = create_node_with_children(op, node, right);
+    }
+    return node;
+}
+
+ParseNode *parse_addition() {
+    ParseNode *node = parse_multiply();
+
+    while (match(OP_ADD) || match(OP_SUB)) {
+        TokenType op = current_t.category;
+        advance();
+        ParseNode *right = parse_multiply();
+
+        node = create_node_with_children(op, node, right);
+    }
+    return node;
+}
+
+ParseNode *parse_relation() {
+    ParseNode *node = parse_addition();
+
+    while (match(OP_EQ) ||
+           match(OP_LT) || match(OP_LTE) ||
+           match(OP_GT) || match(OP_GTE)) {
+        TokenType op = current_t.category;
+        advance();
+        ParseNode *right = parse_addition();
+
+        node = create_node_with_children(op, node, right);
+    }
+    return node;
+}
+
 ParseNode *parse_return() {
     expect(RETURN);
     ParseNode *node = create_node(RETURN);
@@ -347,14 +395,7 @@ ParseNode *parse_expression() {
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
     } else if (is_operator(peek().category)) { // Operator
-        ParseNode* left = parse_term();
-        ParseNode* operator = parse_operator();
-        ParseNode* right = parse_expression();
-
-        operator->left = left;
-        operator->right = right;
-
-        return operator;
+        return parse_relation();
     } else if (match(RETURN)) {
         return parse_return();
     } else {
