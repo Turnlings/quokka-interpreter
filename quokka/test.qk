@@ -1,5 +1,7 @@
-def lemonade(a, b) => {
-    a + b;
+i = true;
+
+while i do {
+    i=false;
 };
 
-lemonade("Hello", 6);
+i;

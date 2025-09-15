@@ -8,6 +8,7 @@ ParseNode *parse_expression();
 ParseNode *parse_block();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 ParseNode *create_node(TokenType type);
+ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right);
 
 Token* input_tokens;
 int position;
@@ -142,9 +143,7 @@ ParseNode *parse_while() {
     ParseNode *condition = parse_expression();
     expect(DO);
     ParseNode *body = parse_block();
-    ParseNode *node = create_node(WHILE);
-    node->left = condition;
-    node->right = body;
+    ParseNode *node = create_node_with_children(WHILE, condition, body);
     return node;
 }
 
@@ -158,17 +157,10 @@ ParseNode *parse_for() {
     expect(SEPERATOR);
     ParseNode *body = parse_block();
 
-    ParseNode *node = create_node(FOR);
-    ParseNode *control_p = create_node(CONTROL);
-    ParseNode *control_c = create_node(CONTROL);
+    ParseNode *control_c = create_node_with_children(CONTROL, condition, change);
+    ParseNode *control_p = create_node_with_children(CONTROL, initialise, control_c);
+    ParseNode *node = create_node_with_children(FOR, control_p, body);
 
-    node->left = control_p;
-    control_p->left = initialise;
-    control_p->right = control_c;
-    control_c->left = condition;
-    control_c->right = change;
-
-    node->right = body;
     return node;
 }
 
@@ -184,13 +176,8 @@ ParseNode *parse_if() {
         else_block = parse_block();
     }
 
-    ParseNode *options = create_node(DO);
-    options->left = body;
-    options->right = else_block;
-
-    ParseNode *if_statement = create_node(IF);
-    if_statement->left = condition;
-    if_statement->right = options;
+    ParseNode *options = create_node_with_children(DO, body, else_block);
+    ParseNode *if_statement = create_node_with_children(IF, condition, options);
 
     return if_statement;
 }
@@ -200,9 +187,7 @@ ParseNode *parse_class_definition() {
     ParseNode *identifier = parse_identifier();
     ParseNode *body = parse_block();
 
-    ParseNode *node = create_node(CLASS);
-    node->left = identifier;
-    node->right = body;
+    ParseNode *node = create_node_with_children(CLASS, identifier, body);
     return node;
 }
 
@@ -212,9 +197,7 @@ ParseNode *parse_function_definition() {
     expect(FUNCTION);
     ParseNode *body = parse_block();
 
-    ParseNode *node = create_node(FUNCTION);
-    node->left = identifier;
-    node->right = body;
+    ParseNode *node = create_node_with_children(FUNCTION, identifier, body);
     return node;
 }
 
@@ -232,9 +215,7 @@ ParseNode *parse_assignment() {
  */
 ParseNode *parse_increment_operator() {
     ParseNode* identifier = parse_identifier();
-    ParseNode *assignment = create_node(ASSIGNMENT);
     TokenType operator_type = current_t.category - 2;
-    ParseNode *operator = create_node(operator_type);
     advance();
 
     ParseNode* right = create_node(LITERAL);
@@ -244,10 +225,8 @@ ParseNode *parse_increment_operator() {
     ParseNode *identifier_copy = create_node(IDENTIFIER);
     identifier_copy->value.data.stringValue = strdup(identifier->value.data.stringValue);
 
-    assignment->left = identifier;
-    assignment->right = operator;
-    operator->left = identifier_copy;
-    operator->right = right;
+    ParseNode *operator = create_node_with_children(operator_type, identifier_copy, right);
+    ParseNode *assignment = create_node_with_children(ASSIGNMENT, identifier, operator);
 
     return assignment;
 }
@@ -256,29 +235,18 @@ ParseNode *parse_increment_operator() {
  * @brief Converts input like x += 1 to x = x + 1
  */
 ParseNode *parse_compound_assignment_operator() {
-    ParseNode* identifier = parse_identifier();
-    ParseNode *assignment = create_node(ASSIGNMENT);
+    ParseNode *identifier = parse_identifier();
     TokenType operator_type = current_t.category - 1;
-    ParseNode *operator = create_node(operator_type);
     advance();
     ParseNode* right = parse_expression();
 
     ParseNode *identifier_copy = create_node(IDENTIFIER);
     identifier_copy->value.data.stringValue = identifier->value.data.stringValue;
 
-    assignment->left = identifier;
-    assignment->right = operator;
-    operator->left = identifier_copy;
-    operator->right = right;
+    ParseNode *operator = create_node_with_children(operator_type, identifier_copy, right);
+    ParseNode *assignment = create_node_with_children(ASSIGNMENT, identifier, operator);
 
     return assignment;
-}
-
-ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right) {
-    ParseNode *new_node = create_node(op);
-    new_node->left = left;
-    new_node->right = right;
-    return new_node;
 }
 
 ParseNode *parse_multiply() {
@@ -367,9 +335,7 @@ ParseNode *parse_expression() {
         expect(ASSIGNMENT);
         ParseNode* right = parse_expression();
 
-        ParseNode* set = create_node(SET);
-        set->left = left;
-        set->right = right;
+        ParseNode* set = create_node_with_children(SET, left, right);
 
         return set;
     } else if (match(WHILE)) {
@@ -470,4 +436,11 @@ ParseNode *create_node(TokenType type) {
     ParseNode *node = parse_node_create(type);
     node->line = current_t.line;
     return node;
+}
+
+ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right) {
+    ParseNode *new_node = create_node(op);
+    new_node->left = left;
+    new_node->right = right;
+    return new_node;
 }
