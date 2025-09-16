@@ -177,6 +177,10 @@ Value *evaluate_list(ParseNode *node) {
 }
 
 Value *access_list(ParseNode *node, Value *id_value) {
+    if (node->right == NULL) { // If no accessor just return whole list
+        return id_value;
+    }
+
     List *list = id_value->data.list;
     Value *index_value = evaluate(node->right);
     if (index_value->type != TYPE_INT) {
@@ -257,6 +261,13 @@ Value *evaluate_op_add(ParseNode *node) {
         
         result->data.stringValue = concat;
     } 
+    else if (left->type == TYPE_LIST && right->type == TYPE_LIST) {
+        result->type = TYPE_LIST;
+        int length = left->data.list->tail + right->data.list->tail + 2;
+        result->data.list = list_create(length);
+        list_copy(left->data.list, result->data.list, 0);
+        list_copy(right->data.list, result->data.list, left->data.list->tail + 1);
+    }
     else {
         runtime_error(node, "Incompatible types for OP_ADD");
         free(result);

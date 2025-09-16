@@ -1,4 +1,5 @@
 #include "token.h"
+#include "features/list.h"
 
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_MOD ||
@@ -35,6 +36,28 @@ const char *token_type_to_string(TokenType type) {
         case FUNCTION: return "FUNC";
         case WHILE: return "WHILE";
         default: return "?";
+    }
+}
+
+void print_value(Value *value) {
+    if (value->type == TYPE_INT || value->type == TYPE_BOOL) {
+        printf("%d", value->data.intValue);
+    }
+    if (value->type == TYPE_FLOAT) {
+        printf("%f", value->data.floatValue);
+    }
+    else if (value->type == TYPE_STRING) {
+        printf("%s", value->data.stringValue);
+    }
+    else if (value->type == TYPE_LIST) {
+        printf("[");
+        for (int i = 0; i <= value->data.list->tail; i++) {
+            print_value(value->data.list->items[i]);
+            if (i < value->data.list->tail) {
+                printf(",");
+            }
+        }
+        printf("]");
     }
 }
 

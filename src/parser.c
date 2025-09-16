@@ -333,11 +333,10 @@ ParseNode *parse_in() {
 ParseNode *parse_list() {
     expect(SQUARE_L);
     ParseNode *list = create_node(LIST);
-    add_child(list, parse_expression());
 
-    while(match(COMMA)) {
-        advance();
+    while(!match(SQUARE_R)) {
         add_child(list, parse_expression());
+        if (match(COMMA)) advance();
     }
 
     expect(SQUARE_R);

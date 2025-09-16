@@ -102,6 +102,8 @@ typedef struct Value {
     } data;
 } Value;
 
+void print_value(Value *value);
+
 typedef struct Token {
     TokenType category;
     char *text;

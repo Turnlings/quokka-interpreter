@@ -10,17 +10,17 @@ List *list_create(int length) {
     return list;
 }
 
-void list_copy(List *original, List *target) {
-    if (original->tail > target->array_length) {
-        fprintf(stderr, "Cannot copy list to smaller list\n");
+void list_copy(List *original, List *target, int offset) {
+    if (original->tail > target->array_length + offset) {
+        fprintf(stderr, "Cannot copy list to smaller list\nOriginal: %d\nTarget: %d\n",original->tail, target->array_length + offset);
         return;
     }
 
     for (int i = 0; i <= original->tail; i++) {
-        target->items[i] = original->items[i];
+        target->items[i + offset] = original->items[i];
     }
 
-    target->tail = original->tail;
+    target->tail = original->tail + offset;
 }
 
 void list_add(List **plist, Value *item) {
@@ -28,7 +28,7 @@ void list_add(List **plist, Value *item) {
 
     if (list->tail + 1 >= list->array_length) {
         List *new_list = list_create(list->array_length*2);
-        list_copy(list, new_list);
+        list_copy(list, new_list, 0);
         list_destroy(list); // Cleanup old list
         list = new_list;
         *plist = new_list;

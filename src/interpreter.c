@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "utils/file_utils.h"
 #include "utils/hash_table.h"
+#include "features/list.h"
 #include "token.h"
 #include "lexer.h"
 #include "parser.h"
@@ -42,15 +43,9 @@ int main() {
             fprintf(stderr, "Evaluation failed\n");
         }
 
-        if (return_value->type == TYPE_INT || return_value->type == TYPE_BOOL) {
-            printf("\nEvaluation Return Value: %d\n", return_value->data.intValue);
-        }
-        if (return_value->type == TYPE_FLOAT) {
-            printf("\nEvaluation Return Value: %f\n", return_value->data.floatValue);
-        }
-        else if (return_value->type == TYPE_STRING) {
-            printf("\nEvaluation Return Value: %s\n", return_value->data.stringValue);
-        }
+        printf("\nEvaluation Return Value: ");
+        print_value(return_value);
+        printf("\n");
         
         free_ast(ast);
         free_tokens(tokens, token_count);
