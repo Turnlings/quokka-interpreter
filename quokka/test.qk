@@ -1,4 +1,9 @@
-a = [1,2,3];
-b = [4,5,6];
+class Cat() {
+    meow = "meow";
+};
 
-c = a + b;
+cats = [Cat(), Cat(), Cat()];
+
+cat = Cat();
+
+cat.meow;

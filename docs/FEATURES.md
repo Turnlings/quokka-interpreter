@@ -73,7 +73,17 @@ foo(5, 3); // Returns 12
 >> "Hello World" // Prints Hello World
 ```
 
-### Class
+### Lists
+```c
+a = [1,2,3] // List initialisation
+b = [1, 0.1, "quokka"] // You can mix types
+
+b[2] //"quokka"
+
+c = a + b; // [1,2,3,1,0.1,"quokka"]
+```
+
+### Classes and Objects
 ```c
 class Car(colour) {
     speed = 10; // Any initialisation goes here

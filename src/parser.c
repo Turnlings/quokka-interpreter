@@ -7,6 +7,7 @@
 ParseNode *parse_expression();
 ParseNode *parse_block();
 ParseNode *parse_literal();
+ParseNode *parse_dot_operator();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 ParseNode *create_node(TokenType type);
 ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right);
@@ -309,6 +310,19 @@ ParseNode *parse_logical_operators() {
     return node;
 }
 
+ParseNode *parse_dot_operator() {
+    ParseNode *node = parse_logical_operators();
+
+    while (match(OP_DOT)) {
+        TokenType op = current_t.category;
+        advance();
+        ParseNode *right = parse_logical_operators();
+
+        node = create_node_with_children(op, node, right);
+    }
+    return node;
+}
+
 ParseNode *parse_return() {
     expect(RETURN);
     ParseNode *node = create_node(RETURN);
@@ -383,8 +397,8 @@ ParseNode *parse_expression() {
         return parse_increment_operator();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
-    } else if (is_operator(peek().category)) { // All operators
-        return parse_logical_operators();
+    } else if (is_operator(peek().category)) { // All operators in waterfall
+        return parse_dot_operator();
     } else if (match(RETURN)) {
         return parse_return();
     } else {
@@ -439,6 +453,7 @@ ParseNode *parse_program() {
             advance();
         } else {
             syntax_error("Missing semi-colon");
+            advance(); // Temp to break out
         }
     }
 
