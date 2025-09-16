@@ -7,7 +7,7 @@
 ParseNode *parse_expression();
 ParseNode *parse_block();
 ParseNode *parse_literal();
-ParseNode *parse_dot_operator();
+ParseNode *parse_increment_operator();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 ParseNode *create_node(TokenType type);
 ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right);
@@ -133,6 +133,9 @@ ParseNode *parse_literal() {
 }
 
 ParseNode *parse_term() {
+    if (peek_match(OP_ADD_ADD) || peek_match(OP_SUB_SUB)) {
+        return parse_increment_operator();
+    }
     if (match(OP_NOT)) {
         advance();
         ParseNode *not = create_node(OP_NOT);
@@ -256,70 +259,34 @@ ParseNode *parse_compound_assignment_operator() {
     return assignment;
 }
 
-ParseNode *parse_multiply() {
+int op_precedence(TokenType token) {
+    switch(token) {
+        case OP_DOT:              return 5;
+        case OP_MUL: case OP_DIV: return 4;
+        case OP_ADD: case OP_SUB: return 3;
+        case OP_EQ:  case OP_NEQ: 
+        case OP_LT:  case OP_LTE:
+        case OP_GT:  case OP_GTE: return 2;
+        case OP_AND: case OP_OR:  return 1;
+        default:                  return -1;
+    }
+}
+
+ParseNode *parse_op_binary(int min_precedence) {
     ParseNode *node = parse_term();
 
-    while (match(OP_MUL) || match(OP_DIV)) {
+    while (true) {
+        int prec = op_precedence(current_t.category);
+        if (prec < min_precedence) break;
+
         TokenType op = current_t.category;
         advance();
-        ParseNode *right = parse_term();
+
+        ParseNode *right = parse_op_binary(prec + 1);
 
         node = create_node_with_children(op, node, right);
     }
-    return node;
-}
 
-ParseNode *parse_addition() {
-    ParseNode *node = parse_multiply();
-
-    while (match(OP_ADD) || match(OP_SUB)) {
-        TokenType op = current_t.category;
-        advance();
-        ParseNode *right = parse_multiply();
-
-        node = create_node_with_children(op, node, right);
-    }
-    return node;
-}
-
-ParseNode *parse_relation() {
-    ParseNode *node = parse_addition();
-
-    while (match(OP_EQ) || match(OP_NEQ) ||
-           match(OP_LT) || match(OP_LTE) ||
-           match(OP_GT) || match(OP_GTE)) {
-        TokenType op = current_t.category;
-        advance();
-        ParseNode *right = parse_addition();
-
-        node = create_node_with_children(op, node, right);
-    }
-    return node;
-}
-
-ParseNode *parse_logical_operators() {
-    ParseNode *node = parse_relation();
-
-    while (match(OP_AND) || match(OP_OR)) {
-        TokenType op = current_t.category;
-        advance();
-        ParseNode *right = parse_relation();
-
-        node = create_node_with_children(op, node, right);
-    }
-    return node;
-}
-
-ParseNode *parse_dot_operator() {
-    ParseNode *node = parse_logical_operators();
-
-    while (match(OP_DOT)) {
-        TokenType op = current_t.category;
-        advance();
-        ParseNode *right = parse_logical_operators();
-
-        node = create_node_with_children(op, node, right);
-    }
     return node;
 }
 
@@ -393,12 +360,10 @@ ParseNode *parse_expression() {
         return parse_out();
     } else if (match(IN)) {
         return parse_in();
-    } else if (peek_match(OP_ADD_ADD) || peek_match(OP_SUB_SUB)) {
-        return parse_increment_operator();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
     } else if (is_operator(peek().category)) { // All operators in waterfall
-        return parse_dot_operator();
+        return parse_op_binary(0);
     } else if (match(RETURN)) {
         return parse_return();
     } else {

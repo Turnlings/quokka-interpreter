@@ -1,9 +1,7 @@
-class Cat() {
-    meow = "meow";
+class lemon() {
+    a = 10;
 };
 
-cats = [Cat(), Cat(), Cat()];
+b = 2;
 
-cat = Cat();
-
-cat.meow;
+lemon.a * lemon.a + b++;
