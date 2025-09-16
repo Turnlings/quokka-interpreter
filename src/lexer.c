@@ -72,6 +72,8 @@ Token* tokenize(char *input, int *max_token_count) {
             case ')': add_token(PAREN_R); break;
             case '{': add_token(BRACES_L); break;
             case '}': add_token(BRACES_R); break;
+            case '[': add_token(SQUARE_L); break;
+            case ']': add_token(SQUARE_R); break;
             case ',': add_token(COMMA); break;
             case '"': string(); break;
             case '\n': line++; break;

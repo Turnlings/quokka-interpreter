@@ -1,7 +1,2 @@
-i = true;
-
-while i do {
-    i=false;
-};
-
-i;
+a = [1,2,3];
+a[2];

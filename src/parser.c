@@ -6,6 +6,7 @@
 
 ParseNode *parse_expression();
 ParseNode *parse_block();
+ParseNode *parse_literal();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 ParseNode *create_node(TokenType type);
 ParseNode *create_node_with_children(TokenType op, ParseNode *left, ParseNode *right);
@@ -78,9 +79,14 @@ ParseNode *parse_identifier() {
             ParseNode *args = parse_args();
             node->right = args;
         }
+        if (match(SQUARE_L)) { // List access
+            advance();
+            node->right = parse_literal();
+            expect(SQUARE_R);
+        }
         return node;
     } else {
-        syntax_error("Expected Idnetifier");
+        syntax_error("Expected Identifier");
         return NULL;
     }
 }
@@ -324,6 +330,21 @@ ParseNode *parse_in() {
     return create_node(IN);
 }
 
+ParseNode *parse_list() {
+    expect(SQUARE_L);
+    ParseNode *list = create_node(LIST);
+    add_child(list, parse_expression());
+
+    while(match(COMMA)) {
+        advance();
+        add_child(list, parse_expression());
+    }
+
+    expect(SQUARE_R);
+
+    return list;
+}
+
 ParseNode *parse_expression() {
     if (match(DEF)) {
         return parse_function_definition();
@@ -353,6 +374,8 @@ ParseNode *parse_expression() {
         assignment->right = right;
 
         return assignment;
+    } else if (match(SQUARE_L)) {
+        return parse_list();
     } else if (match(OUT)) {
         return parse_out();
     } else if (match(IN)) {

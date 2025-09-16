@@ -4,6 +4,7 @@
 #include "token.h"
 #include "utils/hash_table.h"
 #include "utils/call_stack.h"
+#include "features/list.h"
 #include "evaluator.h"
 
 #define MAX_STRING_LENGTH 128
@@ -14,6 +15,7 @@ Value *evaluate_assignment(ParseNode *node);
 Value *evaluate_set(ParseNode *node);
 Value *evaluate_class(ParseNode *node);
 Value *evaluate_function(ParseNode *node);
+Value *evaluate_list(ParseNode *node);
 Value *evaluate_identifier(ParseNode *node);
 Value *evaluate_while(ParseNode *node);
 Value *evaluate_for(ParseNode *node);
@@ -57,6 +59,7 @@ Value *evaluate(ParseNode *node) {
         case SET: return evaluate_set(node); // Like self.identifier
         case CLASS: return evaluate_class(node);
         case FUNCTION: return evaluate_function(node);
+        case LIST: return evaluate_list(node);
         case IDENTIFIER: return evaluate_identifier(node);
         case WHILE: return evaluate_while(node);
         case FOR: return evaluate_for(node);
@@ -158,6 +161,33 @@ Value *evaluate_function(ParseNode *node) {
     return func_value;
 }
 
+Value *evaluate_list(ParseNode *node) {
+    List *list = list_create(1);
+    node = node->right;
+    while(node!=NULL) {
+        list_add(&list, evaluate(node));
+        node = node->right;
+    }
+
+    Value *list_value = malloc(sizeof(Value));
+    list_value->type = TYPE_LIST;
+    list_value->data.list = list;
+
+    return list_value;
+}
+
+Value *access_list(ParseNode *node, Value *id_value) {
+    List *list = id_value->data.list;
+    Value *index_value = evaluate(node->right);
+    if (index_value->type != TYPE_INT) {
+        runtime_error(node, "Invalid type for list index");
+        return NULL;
+    }
+    int index = index_value->data.intValue;
+    
+    return list_access(list, index);
+}
+
 Value *evaluate_identifier(ParseNode *node) {
     Value *id_value = malloc(sizeof(Value));
     int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
@@ -167,6 +197,8 @@ Value *evaluate_identifier(ParseNode *node) {
         exit(1);
     }
     switch (id_value->type) {
+        case TYPE_LIST:
+            return access_list(node, id_value);
         case TYPE_FUNCTION:
             return execute_function(node, id_value);
         case TYPE_CLASS:

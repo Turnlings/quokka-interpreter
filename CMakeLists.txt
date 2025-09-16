@@ -9,6 +9,7 @@ set(CMAKE_C_STANDARD_REQUIRED True)
 file(GLOB SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/utils/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/features/*.c"
 )
 
 add_executable(interpreter ${SRC_FILES})

@@ -85,6 +85,12 @@ void print_ast(ParseNode *node) {
             else if (node->value.data.stringValue != NULL){
                 printf("%s", node->value.data.stringValue);
             }
+
+            if (node->right!=NULL){
+                printf(",");
+                print_ast(node->right);
+            }
+
             break;
         case PROGRAM: case STATEMENT_LIST: case CLASS:
             printf("%s: ", token_type_to_string(node->type));
@@ -96,6 +102,11 @@ void print_ast(ParseNode *node) {
             print_ast(node->left);
             printf(" BODY: ");
             print_ast(node->right);
+            break;
+        case LIST:
+            printf("[");
+            print_ast(node->right);
+            printf("]");
             break;
         case IF:
             printf("IF ");

@@ -38,6 +38,7 @@ typedef enum {
     LITERAL,
     FLOAT,
     STRING,
+    LIST,
     COMMENT,
     WHITESPACE,
 
@@ -61,6 +62,7 @@ typedef enum {
     // Symbols
     PAREN_L, PAREN_R,
     BRACES_L, BRACES_R,
+    SQUARE_L, SQUARE_R,
     COMMA,
 
     // I/O
@@ -79,12 +81,14 @@ typedef enum {
     TYPE_FLOAT,
     TYPE_STRING,
     TYPE_BOOL,
+    TYPE_LIST,
     TYPE_FUNCTION,
     TYPE_CLASS,
     TYPE_OBJECT
 } ValueType;
 
 typedef struct ParseNode ParseNode;
+typedef struct List List;
 
 typedef struct Value {
     ValueType type;
@@ -94,6 +98,7 @@ typedef struct Value {
         char *stringValue;
         ParseNode *node;
         HashTable *object_fields;
+        List *list;
     } data;
 } Value;
 
