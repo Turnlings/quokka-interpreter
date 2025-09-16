@@ -45,7 +45,7 @@ while a <= b do {
 ### For Loops
 For loops have three parameters, an initialiser, a condition, and an increment.
 ```c
-for int i = 0; i <= 10; i = i + 1 {
+for int i = 0; i <= 10; i = i + 1; {
     >> i; // Prints numbers 0 to 10 inclusive
 }
 ```
@@ -59,7 +59,7 @@ def a => 1 + 2;
 a; // Returns 3
 
 // Or with parameters
-def foo(x, y) => {
+def foo(x, y) do {
     x = x + 1;
     y = y - 1;
     x * y; // The final value is automatically returned

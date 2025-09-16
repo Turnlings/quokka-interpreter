@@ -1,7 +1,4 @@
-class lemon() {
-    a = 10;
-};
+def double(x) {x*2;};
 
-b = 2;
+double(2);
 
-lemon.a * lemon.a + b++;

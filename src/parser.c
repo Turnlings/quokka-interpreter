@@ -52,6 +52,12 @@ static void expect(TokenType expected) {
     }
 }
 
+static void allow(TokenType allowed) {
+    if (current_t.category == allowed) {
+        advance();
+    }
+}
+
 static bool match(TokenType match) {
     return current_t.category == match;
 }
@@ -151,7 +157,7 @@ ParseNode *parse_term() {
 ParseNode *parse_while() {
     expect(WHILE);
     ParseNode *condition = parse_expression();
-    expect(DO);
+    allow(DO);
     ParseNode *body = parse_block();
     ParseNode *node = create_node_with_children(WHILE, condition, body);
     return node;
@@ -164,7 +170,8 @@ ParseNode *parse_for() {
     ParseNode *condition = parse_expression();
     expect(SEPERATOR);
     ParseNode *change = parse_expression();
-    expect(SEPERATOR);
+    allow(SEPERATOR);
+    allow(DO);
     ParseNode *body = parse_block();
 
     ParseNode *control_c = create_node_with_children(CONTROL, condition, change);
@@ -177,7 +184,7 @@ ParseNode *parse_for() {
 ParseNode *parse_if() {
     expect(IF);
     ParseNode *condition = parse_expression();
-    expect(DO);
+    allow(DO);
     ParseNode *body = parse_block();
     ParseNode *else_block = NULL;
 
@@ -204,7 +211,7 @@ ParseNode *parse_class_definition() {
 ParseNode *parse_function_definition() {
     expect(DEF);
     ParseNode *identifier = parse_expression();
-    expect(FUNCTION);
+    allow(DO);
     ParseNode *body = parse_block();
 
     ParseNode *node = create_node_with_children(FUNCTION, identifier, body);
