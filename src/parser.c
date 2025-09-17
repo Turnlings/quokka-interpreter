@@ -274,7 +274,8 @@ ParseNode *parse_compound_assignment_operator() {
 int op_precedence(TokenType token) {
     switch(token) {
         case OP_DOT:              return 5;
-        case OP_MUL: case OP_DIV: return 4;
+        case OP_MUL: case OP_DIV: 
+        case OP_MOD:              return 4;
         case OP_ADD: case OP_SUB: return 3;
         case OP_EQ:  case OP_NEQ: 
         case OP_LT:  case OP_LTE:
