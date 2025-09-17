@@ -130,8 +130,8 @@ Value *evaluate_set(ParseNode *node) {
     Value *rhs = evaluate(node->right);
 
     // Get the object
-    Value *object = malloc(sizeof(Value));
-    int found_object = stack_get_value(callStack, "self", object);
+    Value *object;
+    int found_object = stack_get_value(callStack, "self", &object);
     if (found_object == 0) {
         runtime_error(node, "Set used but no class to reference");
         cleanup();
@@ -193,8 +193,8 @@ Value *access_list(ParseNode *node, Value *id_value) {
 }
 
 Value *evaluate_identifier(ParseNode *node) {
-    Value *id_value = malloc(sizeof(Value));
-    int found = stack_get_value(callStack, node->value.data.stringValue, id_value);
+    Value *id_value;
+    int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
     if (found == 0) {
         runtime_error(node, "Identifier not yet declared");
         cleanup();
@@ -532,8 +532,8 @@ Value *call_object(ParseNode *node) {
     }
 
     // Look up field/method in object's hash table
-    Value *member = malloc(sizeof(Value));
-    int found = hashtable_get(obj->data.object_fields, node->right->value.data.stringValue, member);
+    Value *member;
+    int found = hashtable_get(obj->data.object_fields, node->right->value.data.stringValue, &member);
     if (!found) {
         runtime_error(node, "Invalid member for object");
     }

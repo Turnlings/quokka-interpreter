@@ -86,13 +86,13 @@ void hashtable_set(HashTable *table, char *key, Value *value) {
  * @param out_value A pointer to the value at the key.
  * @return Status of 1 if successful and 0 if not.
  */
-int hashtable_get(HashTable *table, const char *key, Value *out_value) {
+int hashtable_get(HashTable *table, const char *key, Value **out_value) {
     if (!table) return 0;
     unsigned int pos = hash(key, table->size);
     Pair *entry = table->buckets[pos];
     while (entry) {
         if (strcmp(entry->key, key) == 0) {
-            *out_value = entry->value;
+            *out_value = &entry->value;
             return 1;
         }
         entry = entry->next;

@@ -22,7 +22,7 @@ void stack_init(CallStack *stack);
 void stack_push(CallStack *stack, StackFrame *frame);
 StackFrame *stack_pop(CallStack *stack);
 StackFrame *stack_peek(CallStack *stack);
-int stack_get_value(CallStack *stack, const char *key, Value *out_value);
+int stack_get_value(CallStack *stack, const char *key, Value **out_value);
 void stack_destroy(CallStack *stack);
 
 void stack_print(CallStack *stack);
