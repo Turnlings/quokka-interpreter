@@ -22,6 +22,7 @@ ParseNode *parse_node_create(TokenType type){
         exit(1);
     }
     node->type = type;
+    node->value.type = TYPE_NONE;
 
     node->left = NULL;
     node->right = NULL;

@@ -77,6 +77,7 @@ int is_operator(TokenType type);
 int is_compound_assignment_operator(TokenType type);
 
 typedef enum {
+    TYPE_NONE,
     TYPE_INT,
     TYPE_FLOAT,
     TYPE_STRING,
