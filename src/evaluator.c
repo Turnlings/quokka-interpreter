@@ -158,6 +158,13 @@ Value *evaluate_function(ParseNode *node) {
     hashtable_set(stack_peek(callStack)->local_variables,
                 node->left->value.data.stringValue,
                 func_value);
+
+    // Use the value in the hashtable instead
+    free(func_value);
+    hashtable_get(stack_peek(callStack)->local_variables,
+                node->left->value.data.stringValue,
+                &func_value);
+
     return func_value;
 }
 
