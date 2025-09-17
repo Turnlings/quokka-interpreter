@@ -103,7 +103,9 @@ typedef struct Value {
     } data;
 } Value;
 
+Value *value_create(ValueType value);
 void print_value(Value *value);
+void value_destroy(Value value);
 
 typedef struct Token {
     TokenType category;

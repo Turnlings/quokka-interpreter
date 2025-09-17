@@ -524,6 +524,7 @@ Value *build_object(ParseNode *node, Value *class) {
     Value *obj = malloc(sizeof(Value));
     obj->type = TYPE_OBJECT;
     obj->data.object_fields = fields_stack->local_variables;
+    frame_destroy(fields_stack, 0);
 
     hashtable_set(local_variables, "self", obj);
 

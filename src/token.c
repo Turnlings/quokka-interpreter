@@ -1,5 +1,6 @@
 #include "token.h"
 #include "features/list.h"
+#include "utils/hash_table.h"
 
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_MOD ||
@@ -37,6 +38,25 @@ const char *token_type_to_string(TokenType type) {
         case FUNCTION: return "FUNC";
         case WHILE: return "WHILE";
         default: return "?";
+    }
+}
+
+Value *value_create(ValueType type) {
+    Value *value = malloc(sizeof(Value));
+    value->type = type;
+}
+
+void value_destroy(Value value) {
+    if(value.type == TYPE_OBJECT) {
+        // Derefence self to stop infinite loop
+        hashtable_set(value.data.object_fields, "self", value_create(TYPE_NONE));
+
+        hashtable_destroy(value.data.object_fields);
+        value.data.object_fields = NULL;
+    }
+    if(value.type == TYPE_LIST) {
+        list_destroy(value.data.list);
+        value.data.list = NULL;
     }
 }
 

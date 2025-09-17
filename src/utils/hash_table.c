@@ -39,7 +39,7 @@ HashTable *hashtable_create(size_t size) {
     HashTable* table = malloc(sizeof(HashTable));
     if (!table) return NULL;
     table->size = size;
-    table->buckets = calloc(size, sizeof(Pair*));
+    table->buckets = malloc(size * sizeof(Pair*));
     if (!table->buckets) {
         free(table);
         return NULL;
@@ -104,13 +104,14 @@ int hashtable_get(HashTable *table, const char *key, Value **out_value) {
  * @brief Properly handles the deletion of all parts of the hash table.
  * @param table The hash table to destroy.
  */
-void hashtable_destroy(HashTable *table) { // TODO: does this leak values?
+void hashtable_destroy(HashTable *table) {
     if (!table) return;
     for (size_t i = 0; i < table->size; i++) {
         Pair *entry = table->buckets[i];
         while (entry) {
             Pair *next = entry->next;
             free(entry->key);
+            value_destroy(entry->value);
             free(entry);
             entry = next;
         }
