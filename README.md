@@ -15,7 +15,7 @@ For examples, see the [docs](docs/FEATURES.md).
 
 ### Implemented
 
-- Dynamic Types (Integers, Floats, Strings and Booleans)
+- Dynamic Types
 - Arithmetic and Comparators
 - Conditionals
 - While and For Loops
@@ -24,10 +24,14 @@ For examples, see the [docs](docs/FEATURES.md).
 
 ### Planned
 
-- Arrays/Lists
 - Import/Include Statements
 - Error Handling
 - Standard Library
+
+## Syntax Highlighting
+
+A separate VS Code extension provides syntax highlighting for Quokka files (`*.qk`).  
+See the [Quokka Extension repository](https://github.com/Turnlings/quokka-extension) for installation instructions and screenshots.
 
 ## Why Call It Quokka???
 
