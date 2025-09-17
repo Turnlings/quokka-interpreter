@@ -44,6 +44,11 @@ static bool peek_match(TokenType match) {
     return input_tokens[position + 1].category == match;
 }
 
+static bool previous_match(TokenType match) {
+    if (position - 1 < 0) return false;
+    return input_tokens[position - 1].category == match;
+}
+
 static void expect(TokenType expected) {
     if (current_t.category == expected) {
         advance();
@@ -390,7 +395,7 @@ ParseNode *add_child(ParseNode *parent, ParseNode *child) {
 }
 
 ParseNode *parse_block() {
-    if(match(BRACES_L)) { // TODO: can this replace parts of parse_program?
+    if(match(BRACES_L)) {
         expect(BRACES_L);
         ParseNode *root = create_node(STATEMENT_LIST);
         while (!match(BRACES_R)) {
@@ -401,14 +406,20 @@ ParseNode *parse_block() {
 
             if (match(SEPERATOR)) {
                 advance();
-            } else {
-                syntax_error("Missing semi-colon in block");
+            } else if (!previous_match(BRACES_R)) {
+                syntax_error("Missing semi-colon");
             }
         }
-        advance();
+        expect(BRACES_R);
         return root;
     } else {
-        return parse_expression();
+        ParseNode *node = parse_expression();
+        if (match(SEPERATOR)) {
+            advance();
+        } else if (!previous_match(BRACES_R)) {
+            syntax_error("Missing semi-colon");
+        }
+        return node;
     }
 }
 
@@ -417,16 +428,9 @@ ParseNode *parse_program() {
 
     while (position < count) {
         ParseNode *node = create_node(STATEMENT_LIST);
-        ParseNode *expr = parse_expression();
+        ParseNode *expr = parse_block();
         node->left = expr;
         root = add_child(root, node);
-
-        if (current_t.category == SEPERATOR) {
-            advance();
-        } else {
-            syntax_error("Missing semi-colon");
-            advance(); // Temp to break out
-        }
     }
 
     return root;

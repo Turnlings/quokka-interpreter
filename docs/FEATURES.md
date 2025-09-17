@@ -88,11 +88,11 @@ c = a + b; // [1,2,3,1,0.1,"quokka"]
 class Car(colour) {
     speed = 10; // Any initialisation goes here
 
-    def print_colour => {
+    def print_colour {
         >> colour;
     }
 
-    def set_colour(col) => {
+    def set_colour(col) {
         // Use the set keyword to assign the variable to the objet
         set colour = col; 
     }

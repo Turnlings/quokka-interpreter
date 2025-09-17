@@ -1,4 +1,20 @@
-def double(x) {x*2;};
+class Car(colour) {
+    speed = 10; // Any initialisation goes here
 
-double(2);
+    def print_colour {
+        >> colour;
+    }
 
+    def set_colour(col) {
+        // Use the set keyword to assign the variable to the objet
+        set colour = col; 
+    }
+}
+
+car = Car("red");
+
+car.print_colour; // red
+
+car.set_colour("blue");
+
+car.print_colour; // blue
