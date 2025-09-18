@@ -94,7 +94,7 @@ Value *evaluate(ParseNode *node) {
 
 Value *evaluate_program(ParseNode *node) {
     Value *program_return = malloc(sizeof(Value));
-    *program_return = *evaluate(node->right); // copy value
+    program_return = value_copy(evaluate(node->right));
     cleanup();
     return program_return;
 }

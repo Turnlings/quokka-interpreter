@@ -104,6 +104,7 @@ typedef struct Value {
 } Value;
 
 Value *value_create(ValueType value);
+Value *value_copy(Value *old);
 void print_value(Value *value);
 void value_destroy(Value value);
 

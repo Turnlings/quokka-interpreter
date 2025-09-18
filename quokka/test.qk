@@ -18,3 +18,7 @@ car.print_colour; // red
 car.set_colour("blue");
 
 car.print_colour; // blue
+
+
+// This breaks things, I reckon because it tries to delete car twice and cant access it to delete the second time.
+list = [1, 2, car];

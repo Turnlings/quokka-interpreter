@@ -46,6 +46,35 @@ Value *value_create(ValueType type) {
     value->type = type;
 }
 
+Value *value_copy(Value *old) {
+    Value *copy = malloc(sizeof(Value));
+    copy->type = old->type;
+
+    switch (old->type) {
+        case TYPE_INT:
+            copy->data.intValue = old->data.intValue;
+            break;
+        case TYPE_FLOAT:
+            copy->data.floatValue = old->data.floatValue;
+            break;
+        case TYPE_STRING:
+            if (old->data.stringValue)
+                copy->data.stringValue = strdup(old->data.stringValue);
+            else
+                copy->data.stringValue = NULL;
+            break;
+        case TYPE_LIST:
+            List *list = list_create(old->data.list->array_length);
+            list_copy(old->data.list, list,0);
+            copy->data.list = list;
+            break;
+        default:
+            fprintf(stderr, "Unknown ValueType in deep_copy_value\n");
+            free(copy);
+            return NULL;
+    }
+}
+
 void value_destroy(Value value) {
     if(value.type == TYPE_OBJECT) {
         // Derefence self to stop infinite loop
@@ -53,10 +82,12 @@ void value_destroy(Value value) {
 
         hashtable_destroy(value.data.object_fields);
         value.data.object_fields = NULL;
+        value.type = TYPE_NONE;
     }
     if(value.type == TYPE_LIST) {
         list_destroy(value.data.list);
         value.data.list = NULL;
+        value.type = TYPE_NONE;
     }
 }
 
@@ -64,11 +95,14 @@ void print_value(Value *value) {
     if (value->type == TYPE_INT || value->type == TYPE_BOOL) {
         printf("%d", value->data.intValue);
     }
-    if (value->type == TYPE_FLOAT) {
+    else if (value->type == TYPE_FLOAT) {
         printf("%f", value->data.floatValue);
     }
     else if (value->type == TYPE_STRING) {
         printf("%s", value->data.stringValue);
+    }
+    else if (value->type == TYPE_OBJECT) {
+        printf("OBJECT");
     }
     else if (value->type == TYPE_LIST) {
         printf("[");
@@ -79,6 +113,8 @@ void print_value(Value *value) {
             }
         }
         printf("]");
+    } else {
+        printf("?");
     }
 }
 
