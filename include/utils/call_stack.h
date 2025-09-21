@@ -16,6 +16,7 @@ typedef struct CallStack {
 } CallStack;
 
 StackFrame* frame_create(char *name);
+StackFrame *frame_create_with_variables(char *name, HashTable *table);
 void frame_destroy(StackFrame *frame, int destroy_hashtable);
 
 void stack_init(CallStack *stack);

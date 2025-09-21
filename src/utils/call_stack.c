@@ -17,11 +17,20 @@ typedef struct CallStack {
     int top;
 } CallStack;
 
-StackFrame* frame_create(char *name) {
+StackFrame *frame_create(char *name) {
     StackFrame* frame = malloc(sizeof(StackFrame));
     if (!frame) return NULL;
     frame->caller = name;
     frame->local_variables = hashtable_create(32);
+    frame->status = 0;
+    return frame;
+} 
+
+StackFrame *frame_create_with_variables(char *name, HashTable *table) {
+    StackFrame* frame = malloc(sizeof(StackFrame));
+    if (!frame) return NULL;
+    frame->caller = name;
+    frame->local_variables = table;
     frame->status = 0;
     return frame;
 } 

@@ -514,8 +514,7 @@ Value *build_object(ParseNode *node, Value *class) {
     }
 
     // Create a frame that will be auto filled with the object fields
-    StackFrame *frame = frame_create(node->value.data.stringValue);
-    frame->local_variables = local_variables;
+    StackFrame *frame = frame_create_with_variables(node->value.data.stringValue, local_variables);
 
     stack_push(callStack, frame);
     Value *body = evaluate(class->data.node->right);
@@ -548,8 +547,7 @@ Value *call_object(ParseNode *node) {
 
     switch (member->type) {
         case TYPE_FUNCTION:
-            StackFrame* frame = frame_create(node->value.data.stringValue);
-            frame->local_variables = obj->data.object_fields;
+            StackFrame* frame = frame_create_with_variables(node->value.data.stringValue, obj->data.object_fields);
             stack_push(callStack, frame);
 
             Value *result = execute_function(node->right, member);
@@ -570,5 +568,6 @@ void runtime_error(ParseNode *node, char* string) {
 }
 
 void cleanup() {
+    printf("Cleaning up...\n");
     stack_destroy(callStack);
 }

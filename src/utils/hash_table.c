@@ -39,7 +39,7 @@ HashTable *hashtable_create(size_t size) {
     HashTable* table = malloc(sizeof(HashTable));
     if (!table) return NULL;
     table->size = size;
-    table->buckets = malloc(size * sizeof(Pair*));
+    table->buckets = calloc(size, sizeof(Pair*));
     if (!table->buckets) {
         free(table);
         return NULL;
