@@ -12,7 +12,7 @@ file(GLOB SRC_FILES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/features/*.c"
 )
 
-add_executable(interpreter ${SRC_FILES})
+add_executable(quokka ${SRC_FILES})
 
 # Add include directories (headers in include/)
-target_include_directories(interpreter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(quokka PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

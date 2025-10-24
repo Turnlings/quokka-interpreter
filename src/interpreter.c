@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include "utils/file_utils.h"
 #include "utils/hash_table.h"
@@ -12,40 +13,58 @@
 #define MAX_TOKEN_COUNT 128
 #define MAX_SYMBOL_COUNT 128
 
-int main() {
-    char *input = read_file("quokka/test.qk");
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("Must provide filename\nOptional flags\n\t--debug: prints more information\n");
+        exit(0);
+    }
+
+    char *filename = argv[1];
+    int debug = 0;
+
+    if (argc > 2 && strcmp(argv[2], "--debug") == 0) {
+        debug = 1;
+    }
+
+    if (debug) printf("Running file: %s\n", filename);
+    char *input = read_file(filename);
+
     if (input) {
         // Tokenisation
         int token_count = MAX_TOKEN_COUNT;
         Token *tokens = tokenize(input, &token_count);
         if (tokens != NULL) {
-            printf("Tokenisation Successful\n");
+            if (debug) printf("Tokenisation Successful\n");
         } else {
             fprintf(stderr, "Tokenisation failed\n");
         }
 
-        printf("Token Count: %d\n", token_count);
+        if (debug) printf("Token Count: %d\n", token_count);
 
         // Parsing
         ParseNode *ast = parse(tokens, token_count);
         if (ast != NULL) {
-            printf("\nParsing Successful\n");
+            if (debug) printf("\nParsing Successful\n");
         } else {
             fprintf(stderr, "\nParsing failed\n");
         }
 
         // Debug check parsing
-        print_ast(ast);
-        printf("\n");
+        if (debug) {
+            print_ast(ast);
+            printf("\n");
+        }
 
         Value *return_value = evaluate(ast);
         if (return_value == NULL) {
             fprintf(stderr, "Evaluation failed\n");
         }
 
-        printf("\nEvaluation Return Value: ");
-        print_value(return_value);
-        printf("\n");
+        if (debug) {
+            printf("\nEvaluation Return Value: ");
+            print_value(return_value);
+            printf("\n");
+        }
         
         free_ast(ast);
         free_tokens(tokens, token_count);

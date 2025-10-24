@@ -568,6 +568,5 @@ void runtime_error(ParseNode *node, char* string) {
 }
 
 void cleanup() {
-    printf("Cleaning up...\n");
     stack_destroy(callStack);
 }
