@@ -70,7 +70,8 @@ typedef enum {
     OUT,
 
     // Misc
-    CONTROL
+    CONTROL,
+    IMPORT
 } TokenType;
 
 int is_operator(TokenType type);

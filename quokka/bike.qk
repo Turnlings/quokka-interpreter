@@ -1,0 +1,8 @@
+class Bike() {
+    def ring_bell() {
+        >> "Ding ding!!!";
+    }
+}
+
+bike = Bike();
+bike.ring_bell;

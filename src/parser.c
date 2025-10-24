@@ -338,9 +338,20 @@ ParseNode *parse_list() {
     return list;
 }
 
+ParseNode *parse_import() {
+    expect(IMPORT);
+    ParseNode *import = create_node(IMPORT);
+    ParseNode *filename = parse_literal();
+    import->left = filename;
+
+    return import;
+}
+
 ParseNode *parse_expression() {
     if (match(DEF)) {
         return parse_function_definition();
+    } else if (match(IMPORT)) {
+        return parse_import();
     } else if (match(CLASS)) {
         return parse_class_definition();
     } else if (match(SET)) {

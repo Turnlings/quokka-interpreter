@@ -4,13 +4,17 @@
 #include "token.h"
 #include "utils/hash_table.h"
 #include "utils/call_stack.h"
+#include "utils/file_utils.h"
 #include "features/list.h"
 #include "evaluator.h"
+#include "lexer.h"
+#include "parser.h"
 
 #define MAX_STRING_LENGTH 128
 
 Value *evaluate_program(ParseNode *node);
 Value *evaluate_statement_list(ParseNode *node);
+Value *evaluate_import(ParseNode *node);
 Value *evaluate_assignment(ParseNode *node);
 Value *evaluate_set(ParseNode *node);
 Value *evaluate_class(ParseNode *node);
@@ -55,6 +59,7 @@ Value *evaluate(ParseNode *node) {
     switch (node->type) {
         case PROGRAM: return evaluate_program(node);
         case STATEMENT_LIST: return evaluate_statement_list(node);
+        case IMPORT: return evaluate_import(node);
         case ASSIGNMENT: return evaluate_assignment(node);
         case SET: return evaluate_set(node); // Like self.identifier
         case CLASS: return evaluate_class(node);
@@ -114,6 +119,22 @@ Value *evaluate_statement_list(ParseNode *node) {
         }
         return evaluate(node->right);
     }
+}
+
+Value *evaluate_import(ParseNode *node) {
+    // Lex, Parse and replace this node with that tree
+    // TODO: make safe
+    char *input = read_file(node->left->value.data.stringValue);
+    if (!input) {
+        runtime_error(node, "Invalid import statement");
+    }
+    int token_count = 1024;
+    Token *tokens = tokenize(input, &token_count);
+    ParseNode *ast = parse(tokens, token_count);
+
+    node->left = ast;
+
+    evaluate_statement_list(ast);
 }
 
 Value *evaluate_assignment(ParseNode *node) {

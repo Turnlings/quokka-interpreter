@@ -1,3 +1,5 @@
+import "quokka/bike.qk";
+
 class Car(colour) {
     speed = 10; // Any initialisation goes here
 
@@ -20,3 +22,8 @@ car.set_colour("blue");
 car.print_colour; // blue
 
 list = [1, 2, car];
+
+a = 1;
+
+bike_two = Bike();
+bike_two.ring_bell;

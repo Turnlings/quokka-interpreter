@@ -188,6 +188,7 @@ Keyword keywords[] = {
     {"return", RETURN},
     {"true", TRUE},
     {"false", FALSE},
+    {"import", IMPORT},
     {NULL, 0}
 };
 
