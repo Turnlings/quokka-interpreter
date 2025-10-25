@@ -1,5 +1,17 @@
 # Language Features
 
+## Contents
+- [Variable Assignment](#variable-assignment)
+- [Basic Operators](#basic-operators)
+- [If-Else Statements](#if-else-statements)
+- [While Loops](#while-loops)
+- [For Loops](#for-loops)
+- [Functions](#functions)
+- [Print to Console](#print-to-console)
+- [Lists](#lists)
+- [Classes and Objects](#classes-and-objects)
+- [Imports](#imports)
+
 ### Variable Assignment 
 Variables are dynamically typed.
 ```c
@@ -53,7 +65,7 @@ for int i = 0; i <= 10; i = i + 1; {
 ### Functions
 ```c
 // Without parameters
-def a => 1 + 2;
+def a do 1 + 2;
 
 // Call with the identifier
 a; // Returns 3
@@ -105,4 +117,10 @@ car.print_colour; // red
 car.set_colour("blue");
 
 car.print_colour; // blue
+```
+
+### Imports
+Provide the path to the file to be imported.
+```c
+import "other_file.qk";
 ```

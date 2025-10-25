@@ -21,10 +21,10 @@ For examples, see the [docs](docs/FEATURES.md).
 - While and For Loops
 - Functions
 - Classes and Objects
+- Imports
 
 ### Planned
 
-- Import/Include Statements
 - Error Handling
 - Standard Library
 
