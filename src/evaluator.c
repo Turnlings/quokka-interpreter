@@ -36,6 +36,7 @@ Value *evaluate_return(ParseNode *node);
 
 void runtime_error(ParseNode *node,char* string);
 void cleanup();
+void error_and_exit(ParseNode *node,char* string);
 
 CallStack *callStack = NULL;
 
@@ -122,16 +123,24 @@ Value *evaluate_statement_list(ParseNode *node) {
 }
 
 Value *evaluate_import(ParseNode *node) {
-    // Lex, Parse and replace this node with that tree
-    // TODO: make safe
+    // Replace the import node with the AST of the imported file
     char *input = read_file(node->left->value.data.stringValue);
     if (!input) {
-        runtime_error(node, "Invalid import statement");
+        error_and_exit(node, "Invalid import statement");
     }
-    int token_count = 1024;
-    Token *tokens = tokenize(input, &token_count);
-    ParseNode *ast = parse(tokens, token_count);
 
+    int token_count = 1024; // TODO: look at linking to given count in main file
+    Token *tokens = tokenize(input, &token_count);
+    if (!tokens) {
+        error_and_exit(node, "Failed to tokenize imported file");
+    }
+
+    ParseNode *ast = parse(tokens, token_count);
+    if (!ast) {
+        error_and_exit(node, "Failed to parse imported file");
+    }
+
+    // Add to the tree for easier cleanup
     node->left = ast;
 
     evaluate_statement_list(ast);
@@ -590,4 +599,10 @@ void runtime_error(ParseNode *node, char* string) {
 
 void cleanup() {
     stack_destroy(callStack);
+}
+
+void error_and_exit(ParseNode *node, char* string) {
+    runtime_error(node, string);
+    cleanup();
+    exit(1);
 }
