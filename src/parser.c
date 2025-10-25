@@ -223,15 +223,6 @@ ParseNode *parse_function_definition() {
     return node;
 }
 
-ParseNode *parse_assignment() {
-    if (match(ASSIGNMENT)) {
-        ParseNode *node = create_node(ASSIGNMENT);
-        node->value.data.stringValue = strdup(current_t.text);
-        advance();
-        return node;
-    }
-}
-
 /**
  * @brief Convert x++ to x+=1
  */
@@ -347,49 +338,53 @@ ParseNode *parse_import() {
     return import;
 }
 
+
+ParseNode *parse_set() {
+    expect(SET);
+    ParseNode* left = parse_term();
+    expect(ASSIGNMENT);
+    ParseNode* right = parse_expression();
+
+    ParseNode* set = create_node_with_children(SET, left, right);
+
+    return set;
+}
+
+ParseNode *parse_assignment() {
+    ParseNode* left = parse_term();
+    expect(ASSIGNMENT);
+    ParseNode *assignment = create_node(ASSIGNMENT);
+    assignment->value.data.stringValue = strdup(current_t.text);
+    ParseNode* right = parse_expression();
+
+    assignment->left = left;
+    assignment->right = right;
+
+    return assignment;
+}
+
 ParseNode *parse_expression() {
-    if (match(DEF)) {
-        return parse_function_definition();
-    } else if (match(IMPORT)) {
-        return parse_import();
-    } else if (match(CLASS)) {
-        return parse_class_definition();
-    } else if (match(SET)) {
-        expect(SET);
-        ParseNode* left = parse_term();
-        expect(ASSIGNMENT);
-        ParseNode* right = parse_expression();
+    switch (current_t.category) {
+        case DEF:      return parse_function_definition();
+        case IMPORT:   return parse_import();
+        case CLASS:    return parse_class_definition();
+        case SET:      return parse_set();
+        case WHILE:    return parse_while();
+        case FOR:      return parse_for();
+        case IF:       return parse_if();
+        case SQUARE_L: return parse_list();
+        case IN:       return parse_in();
+        case OUT:      return parse_out();
+        case RETURN:   return parse_return();
+    }
 
-        ParseNode* set = create_node_with_children(SET, left, right);
-
-        return set;
-    } else if (match(WHILE)) {
-        return parse_while();
-    } else if (match(FOR)) {
-        return parse_for();    
-    }else if (match(IF)) {
-        return parse_if();
-    } else if (peek().category == ASSIGNMENT) {
-        ParseNode* left = parse_term();
-        ParseNode* assignment = parse_assignment();
-        ParseNode* right = parse_expression();
-
-        assignment->left = left;
-        assignment->right = right;
-
-        return assignment;
-    } else if (match(SQUARE_L)) {
-        return parse_list();
-    } else if (match(OUT)) {
-        return parse_out();
-    } else if (match(IN)) {
-        return parse_in();
+    if (peek().category == ASSIGNMENT) {
+        return parse_assignment();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
-    } else if (is_operator(peek().category)) { // All operators in waterfall
+    } else if (is_operator(peek().category)) {
+        // All operators with precedence climbing
         return parse_op_binary(0);
-    } else if (match(RETURN)) {
-        return parse_return();
     } else {
         return parse_term();
     }
