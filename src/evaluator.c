@@ -163,9 +163,7 @@ Value *evaluate_set(ParseNode *node) {
     Value *object;
     int found_object = stack_get_value(callStack, "self", &object);
     if (found_object == 0) {
-        runtime_error(node, "Set used but no class to reference");
-        cleanup();
-        exit(1);
+        error_and_exit(node, "Set used but no class to reference");
     }
 
     hashtable_set(object->data.object_fields, node->left->value.data.stringValue, rhs);
@@ -233,9 +231,7 @@ Value *evaluate_identifier(ParseNode *node) {
     Value *id_value;
     int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
     if (found == 0) {
-        runtime_error(node, "Identifier not yet declared");
-        cleanup();
-        exit(1);
+        error_and_exit(node, "Identifier not yet declared");
     }
     switch (id_value->type) {
         case TYPE_LIST:
@@ -289,9 +285,7 @@ Value *evaluate_op_add(ParseNode *node) {
         unsigned int len_right = strlen(right->data.stringValue);
         char *concat = malloc(len_left + len_right + 1);  // +1 for '\0'
         if (!concat) {
-            runtime_error(node, "Malloc Failed");
-            cleanup();
-            exit(1);
+            error_and_exit(node, "Malloc Failed");
         }
         strcpy(concat, left->data.stringValue);
         strcat(concat, right->data.stringValue);
