@@ -118,7 +118,7 @@ ParseNode *parse_identifier() {
                 node->right = args;
             } else if (match(SQUARE_L)) { // List access
                 expect(SQUARE_L);
-                ParseNode *index = parse_term();
+                ParseNode *index = parse_expression();
                 expect(SQUARE_R);
                 node = create_node_with_children(OP_INDEX, node, index);
             } else {

@@ -5,8 +5,8 @@ class Thing_A() {
 a = Thing_A();
 b = Thing_A();
 
-list = [a,b];
+list = [a,b,b];
 
 list[0].a;
 
-c = list[0].a + 1;
+c = list[1 + 1].a + 1;
