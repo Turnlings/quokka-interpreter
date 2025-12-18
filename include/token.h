@@ -28,6 +28,7 @@ typedef enum {
     // Other operators
     OP_DOT,
     ASSIGNMENT,
+    OP_INDEX,
 
     // Logical states and operators
     TRUE, FALSE,
@@ -71,7 +72,8 @@ typedef enum {
 
     // Misc
     CONTROL,
-    IMPORT
+    IMPORT,
+    NONE
 } TokenType;
 
 int is_operator(TokenType type);

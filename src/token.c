@@ -69,7 +69,7 @@ Value *value_copy(Value *old) {
             copy->data.list = list;
             break;
         default:
-            fprintf(stderr, "Unknown ValueType in deep_copy_value\n");
+            fprintf(stderr, "Unknown ValueType in value_copy\n");
             free(copy);
             return NULL;
     }
@@ -202,6 +202,11 @@ void print_ast(ParseNode *node) {
             print_ast(node->left->right->left);
             print_ast(node->left->right->right);
             printf(" DO: ");
+            print_ast(node->right);
+            break;
+        case OP_INDEX:
+            printf("INDEX: ");
+            print_ast(node->left);
             print_ast(node->right);
             break;
         case OUT:

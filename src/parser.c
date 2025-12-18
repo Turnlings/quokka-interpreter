@@ -7,6 +7,7 @@
 ParseNode *parse_expression();
 ParseNode *parse_block();
 ParseNode *parse_literal();
+ParseNode *parse_term();
 ParseNode *parse_increment_operator();
 ParseNode *add_child(ParseNode *parent, ParseNode *child);
 ParseNode *create_node(TokenType type);
@@ -38,6 +39,30 @@ static void advance() {
 
 static Token peek() {
     return input_tokens[position + 1];
+}
+
+static Token peek_past() {
+    int i = position + 1;
+    int depth = 0;
+
+    while (i < count) {
+        Token token = input_tokens[i];
+
+        if (token.category == SQUARE_L || token.category == PAREN_L) {
+            depth++;
+        } else if ((token.category == SQUARE_R || token.category == PAREN_R) && depth > 0) {
+            depth--;
+        } else if (depth == 0) {
+            return token;
+        }
+
+        i++;
+    }
+
+    // Somethings gone wrong
+    Token t = {0};
+    t.category = NONE;
+    return t;
 }
 
 static bool peek_match(TokenType match) {
@@ -87,14 +112,18 @@ ParseNode *parse_identifier() {
         node->value.data.stringValue = current_t.text;
         advance();
 
-        if (match(PAREN_L)) {
-            ParseNode *args = parse_args();
-            node->right = args;
-        }
-        if (match(SQUARE_L)) { // List access
-            advance();
-            node->right = parse_literal();
-            expect(SQUARE_R);
+        while (true) {
+            if (match(PAREN_L)) {
+                ParseNode *args = parse_args();
+                node->right = args;
+            } else if (match(SQUARE_L)) { // List access
+                expect(SQUARE_L);
+                ParseNode *index = parse_term();
+                expect(SQUARE_R);
+                node = create_node_with_children(OP_INDEX, node, index);
+            } else {
+                break;
+            }
         }
         return node;
     } else {
@@ -378,11 +407,11 @@ ParseNode *parse_expression() {
         case RETURN:   return parse_return();
     }
 
-    if (peek().category == ASSIGNMENT) {
+    if (peek_past().category == ASSIGNMENT) {
         return parse_assignment();
     } else if (is_compound_assignment_operator(peek().category)) {
         return parse_compound_assignment_operator();
-    } else if (is_operator(peek().category)) {
+    } else if (is_operator(peek_past().category)) {
         // All operators with precedence climbing
         return parse_op_binary(0);
     } else {

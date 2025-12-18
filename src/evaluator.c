@@ -29,6 +29,7 @@ Value *evaluate_op_binary(ParseNode *node);
 Value *evaluate_op_eq(ParseNode *node);
 Value *evaluate_op_neq(ParseNode *node);
 Value *evaluate_op_not(ParseNode *node);
+Value *evaluate_op_index(ParseNode *node);
 Value *evaluate_if(ParseNode *node);
 Value *evaluate_out(ParseNode *node);
 Value *evaluate_in(ParseNode *node);
@@ -77,6 +78,7 @@ Value *evaluate(ParseNode *node) {
         case OP_NEQ: return evaluate_op_eq(node);
         case OP_DOT: return call_object(node);
         case OP_ADD: return evaluate_op_add(node);
+        case OP_INDEX: return evaluate_op_index(node);
         case OP_SUB:
         case OP_MUL:
         case OP_DIV:
@@ -211,20 +213,20 @@ Value *evaluate_list(ParseNode *node) {
     return list_value;
 }
 
-Value *access_list(ParseNode *node, Value *id_value) {
-    if (node->right == NULL) { // If no accessor just return whole list
-        return id_value;
-    }
+Value *evaluate_op_index(ParseNode *node) {
+    Value *container = evaluate(node->left);
+    Value *index = evaluate(node->right);
 
-    List *list = id_value->data.list;
-    Value *index_value = evaluate(node->right);
-    if (index_value->type != TYPE_INT) {
-        runtime_error(node, "Invalid type for list index");
+    if (container->type != TYPE_LIST) {
+        runtime_error(node, "Indexing non-list");
         return NULL;
     }
-    int index = index_value->data.intValue;
-    
-    return list_access(list, index);
+    if (index->type != TYPE_INT) {
+        runtime_error(node, "List index must be int");
+        return NULL;
+    }
+
+    return list_access(container->data.list, index->data.intValue);
 }
 
 Value *evaluate_identifier(ParseNode *node) {
@@ -234,8 +236,6 @@ Value *evaluate_identifier(ParseNode *node) {
         error_and_exit(node, "Identifier not yet declared");
     }
     switch (id_value->type) {
-        case TYPE_LIST:
-            return access_list(node, id_value);
         case TYPE_FUNCTION:
             return execute_function(node, id_value);
         case TYPE_CLASS:

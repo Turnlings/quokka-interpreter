@@ -1,0 +1,12 @@
+class Thing_A() {
+    a = 1;
+};
+
+a = Thing_A();
+b = Thing_A();
+
+list = [a,b];
+
+list[0].a;
+
+c = list[0].a + 1;
