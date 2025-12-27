@@ -88,7 +88,8 @@ typedef enum {
     TYPE_LIST,
     TYPE_FUNCTION,
     TYPE_CLASS,
-    TYPE_OBJECT
+    TYPE_OBJECT,
+    TYPE_METADATA
 } ValueType;
 
 typedef struct ParseNode ParseNode;

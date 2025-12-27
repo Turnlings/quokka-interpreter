@@ -69,6 +69,8 @@ int main(int argc, char *argv[]) {
         free_ast(ast);
         free_tokens(tokens, token_count);
         free(input);
+        value_destroy(*return_value);
+        free(return_value);
     } else {
         fprintf(stderr, "File read failed\n");
     }

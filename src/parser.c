@@ -383,6 +383,7 @@ ParseNode *parse_assignment() {
     ParseNode* left = parse_term();
     expect(ASSIGNMENT);
     ParseNode *assignment = create_node(ASSIGNMENT);
+    assignment->value.type = TYPE_METADATA;
     assignment->value.data.stringValue = strdup(current_t.text);
     ParseNode* right = parse_expression();
 
