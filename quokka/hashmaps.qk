@@ -1,0 +1,10 @@
+key = "a";
+map = [: key: 2, "b": 3];
+
+map[key];
+
+>> map[key];
+>> map["b"];
+
+list = [1,2,3];
+>> list[1];

@@ -67,7 +67,7 @@ Token* tokenize(char *input, int *max_token_count) {
             case '.': add_token(OP_DOT); break;
             case ';': add_token(SEPERATOR); break;
             case '?': add_token(TERN_IF); break;
-            case ':': add_token(TERN_COLON); break;
+            case ':': add_token(COLON); break;
             case '(': add_token(PAREN_L); break;
             case ')': add_token(PAREN_R); break;
             case '{': add_token(BRACES_L); break;

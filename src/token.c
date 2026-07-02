@@ -103,6 +103,10 @@ void value_destroy(Value value) {
 }
 
 void print_value(Value *value) {
+    if (value == NULL) {
+        printf("NULL");
+        return;
+    }
     if (value->type == TYPE_INT || value->type == TYPE_BOOL) {
         printf("%d", value->data.intValue);
     }
@@ -224,6 +228,16 @@ void print_ast(ParseNode *node) {
         case OUT:
             printf("OUT: ");
             print_ast(node->left);
+            break;
+        case MAP:
+            printf("MAP: ");
+            print_ast(node->right);
+            break;
+        case COLON:
+            printf("PAIR: ");
+            print_ast(node->left);
+            printf(":");
+            print_ast(node->right);
             break;
         default:
             printf("?");

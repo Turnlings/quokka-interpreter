@@ -3,12 +3,7 @@
 
 #include <stddef.h>
 #include "token.h"
-
-typedef struct Pair {
-    char *key;
-    Value value;
-    struct Pair *next;
-} Pair;
+#include "utils/pair.h"
 
 typedef struct HashTable {
     size_t size;

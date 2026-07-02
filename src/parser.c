@@ -344,6 +344,30 @@ ParseNode *parse_in() {
     return create_node(IN);
 }
 
+ParseNode *parse_pair() {
+    ParseNode *key = parse_expression();
+    expect(COLON);
+    ParseNode *value = parse_expression();
+    ParseNode *pair = create_node_with_children(COLON, key, value);
+    return create_node_with_children(COLON, pair, NULL);
+}
+
+ParseNode *parse_map() {
+    expect(SQUARE_L);
+    expect(COLON);
+    ParseNode *map = create_node(MAP);
+
+    while(!match(SQUARE_R)) {
+        ParseNode *pair = parse_pair();
+        add_child(map, pair);
+        if (match(COMMA)) advance();
+    }
+
+    expect(SQUARE_R);
+
+    return map;
+}
+
 ParseNode *parse_list() {
     expect(SQUARE_L);
     ParseNode *list = create_node(LIST);
@@ -356,6 +380,14 @@ ParseNode *parse_list() {
     expect(SQUARE_R);
 
     return list;
+}
+
+ParseNode *parse_datastructure() {
+    if (peek_match(COLON)) {
+        return parse_map();
+    } else {
+        return parse_list();
+    }
 }
 
 ParseNode *parse_import() {
@@ -402,7 +434,7 @@ ParseNode *parse_expression() {
         case WHILE:    return parse_while();
         case FOR:      return parse_for();
         case IF:       return parse_if();
-        case SQUARE_L: return parse_list();
+        case SQUARE_L: return parse_datastructure();
         case IN:       return parse_in();
         case OUT:      return parse_out();
         case RETURN:   return parse_return();

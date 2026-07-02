@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 typedef struct HashTable HashTable;
+typedef struct HashMap HashMap;
 
 typedef enum {
     // General
@@ -40,6 +41,7 @@ typedef enum {
     FLOAT,
     STRING,
     LIST,
+    MAP,
     COMMENT,
     WHITESPACE,
 
@@ -50,7 +52,7 @@ typedef enum {
     DO,
     FOR,
     TERN_IF,
-    TERN_COLON,
+    COLON,
 
     // Structure
     STATEMENT_LIST,
@@ -86,6 +88,7 @@ typedef enum {
     TYPE_STRING,
     TYPE_BOOL,
     TYPE_LIST,
+    TYPE_MAP,
     TYPE_FUNCTION,
     TYPE_CLASS,
     TYPE_OBJECT,
@@ -105,6 +108,7 @@ typedef struct Value {
         ParseNode *node;
         HashTable *object_fields;
         List *list;
+        HashMap *map;
     } data;
 } Value;
 
