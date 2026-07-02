@@ -6,6 +6,7 @@
 #include "utils/call_stack.h"
 #include "utils/file_utils.h"
 #include "features/list.h"
+#include "features/hashmap.h"
 #include "evaluator.h"
 #include "lexer.h"
 #include "parser.h"
@@ -21,6 +22,7 @@ Value *evaluate_set(ParseNode *node);
 Value *evaluate_class(ParseNode *node);
 Value *evaluate_function(ParseNode *node);
 Value *evaluate_list(ParseNode *node);
+Value *evaluate_map(ParseNode *node);
 Value *evaluate_identifier(ParseNode *node);
 Value *evaluate_while(ParseNode *node);
 Value *evaluate_for(ParseNode *node);
@@ -41,6 +43,12 @@ void cleanup();
 void error_and_exit(ParseNode *node,char* string);
 
 CallStack *callStack = NULL;
+bool debug_mode = false;
+int evaluate_depth = 0;
+
+void set_debug_mode_evaluator(bool debug) {
+    debug_mode = debug;
+}
 
 /**
  * @brief Evaluates a given AST to a return value
@@ -67,6 +75,7 @@ Value *evaluate(ParseNode *node) {
         case SET: return evaluate_set(node); // Like self.identifier
         case CLASS: return evaluate_class(node);
         case FUNCTION: return evaluate_function(node);
+        case MAP: return evaluate_map(node);
         case LIST: return evaluate_list(node);
         case IDENTIFIER: return evaluate_identifier(node);
         case WHILE: return evaluate_while(node);
@@ -154,13 +163,38 @@ Value *evaluate_import(ParseNode *node) {
 }
 
 Value *evaluate_assignment(ParseNode *node) {
-    if (!node->left || !node->left->value.data.stringValue) {
+    if (!node->left) {
         runtime_error(node, "Invalid assignment target");
         return NULL;
     }
-    Value *value = evaluate(node->right);
-    hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
-    return value;
+
+    Value *value;
+
+    switch (node->left->type)
+    {
+    case IDENTIFIER:
+        value = evaluate(node->right);
+        hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
+        return value;
+
+    case OP_INDEX:
+        Value *container = evaluate(node->left->left);
+        Value *index = evaluate(node->left->right);
+        value = evaluate(node->right);
+        if (container->type == TYPE_LIST) {
+            list_edit(container->data.list, index->data.intValue, value);
+        } else if (container->type == TYPE_MAP) {
+            hashmap_set(container->data.map, index->data.stringValue, value);
+        } else {
+            runtime_error(node, "Invalid assignment target");
+            return NULL;
+        }
+        return value;
+    
+    default:
+        runtime_error(node, "Invalid assignment target");
+        return NULL;
+    }
 }
 
 Value *evaluate_set(ParseNode *node) {
@@ -218,20 +252,59 @@ Value *evaluate_list(ParseNode *node) {
     return list_value;
 }
 
+Value *evaluate_map(ParseNode *node) {
+    HashMap *map = hashmap_create(1);
+    node = node->right;
+    while(node!=NULL) {
+        Value *key = evaluate(node->left->left);
+        Value *value = evaluate(node->left->right);
+        if (key->type != TYPE_STRING) {
+            runtime_error(node, "Map key must be a string");
+            return NULL;
+        }
+        hashmap_set(map, key->data.stringValue, value);
+        node = node->right;
+    }
+
+    Value *map_value = gc_malloc();
+    map_value->type = TYPE_MAP;
+    map_value->data.map = map;
+
+    if (debug_mode) {
+        printf("Map created with %ld entries\n", map->size);
+    }
+
+    return map_value;
+}
+
 Value *evaluate_op_index(ParseNode *node) {
     Value *container = evaluate(node->left);
     Value *index = evaluate(node->right);
 
-    if (container->type != TYPE_LIST) {
+    if (container->type == TYPE_LIST) {
+        if (index->type != TYPE_INT) {
+            runtime_error(node, "List index must be int");
+            return NULL;
+        }
+
+        return list_access(container->data.list, index->data.intValue);
+
+    } else if (container->type == TYPE_MAP) {
+        if (index->type != TYPE_STRING) {
+            runtime_error(node, "Map index must be a string");
+            return NULL;
+        }
+        Value *value;
+        bool found = hashmap_get(container->data.map, index->data.stringValue, &value);
+        if (!found) {
+            runtime_error(node, "Key not found in map");
+            return NULL;
+        }
+        return value;
+    } else {
         runtime_error(node, "Indexing non-list");
         return NULL;
     }
-    if (index->type != TYPE_INT) {
-        runtime_error(node, "List index must be int");
-        return NULL;
-    }
-
-    return list_access(container->data.list, index->data.intValue);
 }
 
 Value *evaluate_identifier(ParseNode *node) {

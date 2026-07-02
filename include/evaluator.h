@@ -1,6 +1,10 @@
-#include "token.h"
 #ifndef EVALUATOR_H
 #define EVALUATOR_H
+
+#include "token.h"
+#include <stdbool.h>
+
+void set_debug_mode_evaluator(bool debug);
 
 /**
  * @brief Evaluates a given AST to a return value

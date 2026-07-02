@@ -39,7 +39,7 @@ static void advance() {
 
 static Token peek() {
     return input_tokens[position + 1];
-}
+} 
 
 static Token peek_past() {
     int i = position + 1;
@@ -67,6 +67,17 @@ static Token peek_past() {
 
 static bool peek_match(TokenType match) {
     return input_tokens[position + 1].category == match;
+}
+
+static bool precedes(TokenType a, TokenType b) {
+    int pos = position;
+    while (pos < count) {
+        TokenType type = input_tokens[pos].category;
+        if (type == a) return true;
+        if (type == b) return false;
+        pos++;
+    }
+    return false;
 }
 
 static bool previous_match(TokenType match) {
@@ -344,6 +355,33 @@ ParseNode *parse_in() {
     return create_node(IN);
 }
 
+ParseNode *parse_pair() {
+    ParseNode *key = parse_expression();
+    expect(COLON);
+    ParseNode *value = parse_expression();
+    ParseNode *pair = create_node_with_children(COLON, key, value);
+    return create_node_with_children(CONTROL, pair, NULL);
+}
+
+ParseNode *parse_map() {
+    expect(SQUARE_L);
+    ParseNode *map = create_node(MAP);
+
+    if (match(COLON)) {
+        advance();
+    } else {
+        while(!match(SQUARE_R)) {
+            ParseNode *pair = parse_pair();
+            add_child(map, pair);
+            if (match(COMMA)) advance();
+        }
+    }
+
+    expect(SQUARE_R);
+
+    return map;
+}
+
 ParseNode *parse_list() {
     expect(SQUARE_L);
     ParseNode *list = create_node(LIST);
@@ -356,6 +394,14 @@ ParseNode *parse_list() {
     expect(SQUARE_R);
 
     return list;
+}
+
+ParseNode *parse_datastructure() {
+    if (precedes(COLON, SQUARE_R)) {
+        return parse_map();
+    } else {
+        return parse_list();
+    }
 }
 
 ParseNode *parse_import() {
@@ -402,7 +448,7 @@ ParseNode *parse_expression() {
         case WHILE:    return parse_while();
         case FOR:      return parse_for();
         case IF:       return parse_if();
-        case SQUARE_L: return parse_list();
+        case SQUARE_L: return parse_datastructure();
         case IN:       return parse_in();
         case OUT:      return parse_out();
         case RETURN:   return parse_return();

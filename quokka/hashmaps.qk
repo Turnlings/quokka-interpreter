@@ -1,0 +1,14 @@
+key = "a";
+map = [key: 2, "b": 3];
+
+map[key] = 3;
+
+>> map[key];
+
+
+list = [1,2,3];
+list[2] = 4;
+
+>> list[2];
+
+>> map["b"];
