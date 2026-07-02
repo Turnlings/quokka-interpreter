@@ -1,6 +1,7 @@
 #include "token.h"
 #include "features/list.h"
 #include "utils/hash_table.h"
+#include "garbage_collector.h"
 
 int is_operator(TokenType type) {
     return type == OP_ADD || type == OP_SUB || type == OP_MUL || type == OP_DIV || type == OP_MOD ||
@@ -47,7 +48,7 @@ Value *value_create(ValueType type) {
 }
 
 Value *value_copy(Value *old) {
-    Value *copy = malloc(sizeof(Value));
+    Value *copy = gc_malloc();
     copy->type = old->type;
 
     switch (old->type) {
@@ -70,24 +71,34 @@ Value *value_copy(Value *old) {
             break;
         default:
             fprintf(stderr, "Unknown ValueType in value_copy\n");
-            free(copy);
+            printf("Type: %d\n", old->type);
+            gc_dereference(copy);
             return NULL;
     }
+
+    return copy;
 }
 
 void value_destroy(Value value) {
-    if(value.type == TYPE_OBJECT) {
-        // Derefence self to stop infinite loop
-        hashtable_set(value.data.object_fields, "self", value_create(TYPE_NONE));
+    switch (value.type) {
+        case TYPE_OBJECT:
+            // Derefence self to stop infinite loop
+            hashtable_set(value.data.object_fields, "self", value_create(TYPE_NONE));
 
-        hashtable_destroy(value.data.object_fields);
-        value.data.object_fields = NULL;
-        value.type = TYPE_NONE;
-    }
-    if(value.type == TYPE_LIST) {
-        list_destroy(value.data.list);
-        value.data.list = NULL;
-        value.type = TYPE_NONE;
+            hashtable_destroy(value.data.object_fields);
+            value.data.object_fields = NULL;
+            value.type = TYPE_NONE;
+            break;
+        case TYPE_LIST:
+            list_destroy(value.data.list);
+            value.data.list = NULL;
+            value.type = TYPE_NONE;
+            break;
+        // TODO: this is needed but was breaking things
+        // case TYPE_STRING:
+        //     free(value.data.stringValue);
+        //     value.type = TYPE_NONE;
+        //     break;
     }
 }
 
@@ -114,7 +125,8 @@ void print_value(Value *value) {
         }
         printf("]");
     } else {
-        printf("?");
+        printf("VALUE(?)");
+        printf("Type: %d", value->type);
     }
 }
 
@@ -223,5 +235,13 @@ void free_ast(ParseNode *node) {
     if (!node) return;
     free_ast(node->left);
     free_ast(node->right);
+
+    Value value = node->value;
+    switch (value.type) {
+        case TYPE_METADATA:
+            free(value.data.stringValue);
+            break;
+    }
+
     free(node);
 }

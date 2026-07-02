@@ -75,7 +75,6 @@ int stack_get_value(CallStack *stack, const char *key, Value **out_value) {
     for (int i = stack->top; i >= 0; i--) {
         int found = hashtable_get(stack->frames[i]->local_variables, key, out_value);
         if (found && out_value != NULL) {
-            //printf("'%s' found on layer %d\n", key, i);
             return 1;
         }
     }

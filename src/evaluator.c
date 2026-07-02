@@ -9,6 +9,7 @@
 #include "evaluator.h"
 #include "lexer.h"
 #include "parser.h"
+#include "garbage_collector.h"
 
 #define MAX_STRING_LENGTH 128
 
@@ -101,8 +102,12 @@ Value *evaluate(ParseNode *node) {
 }
 
 Value *evaluate_program(ParseNode *node) {
-    Value *program_return = malloc(sizeof(Value));
-    program_return = value_copy(evaluate(node->right));
+    Value *evaluated = evaluate(node->right);
+    if (evaluated == NULL) {
+        return NULL;
+    }
+
+    Value *program_return = value_copy(evaluated);
     cleanup();
     return program_return;
 }
@@ -173,7 +178,7 @@ Value *evaluate_set(ParseNode *node) {
 }
 
 Value *evaluate_class(ParseNode *node) {
-    Value *class_value = malloc(sizeof(Value));
+    Value *class_value = gc_malloc();
     class_value->type = TYPE_CLASS;
     class_value->data.node = node;
 
@@ -182,18 +187,18 @@ Value *evaluate_class(ParseNode *node) {
 }
 
 Value *evaluate_function(ParseNode *node) {
-    Value *func_value = malloc(sizeof(Value));
+    Value *func_value = gc_malloc();
     func_value->type = TYPE_FUNCTION;
     func_value->data.node = node;
     hashtable_set(stack_peek(callStack)->local_variables,
                 node->left->value.data.stringValue,
                 func_value);
 
-    // Use the value in the hashtable instead
-    free(func_value);
-    hashtable_get(stack_peek(callStack)->local_variables,
-                node->left->value.data.stringValue,
-                &func_value);
+    // // Use the value in the hashtable instead
+    // free(func_value);
+    // hashtable_get(stack_peek(callStack)->local_variables,
+    //             node->left->value.data.stringValue,
+    //             &func_value);
 
     return func_value;
 }
@@ -206,7 +211,7 @@ Value *evaluate_list(ParseNode *node) {
         node = node->right;
     }
 
-    Value *list_value = malloc(sizeof(Value));
+    Value *list_value = gc_malloc();
     list_value->type = TYPE_LIST;
     list_value->data.list = list;
 
@@ -268,7 +273,11 @@ Value *evaluate_for(ParseNode *node) {
 }
 
 Value *evaluate_literal(ParseNode *node) {
-    return &node->value;
+    Value *value = gc_malloc();
+    value->type = node->value.type;
+    value->data = node->value.data;
+
+    return value;
 }
 
 Value *evaluate_op_add(ParseNode *node) {
@@ -278,7 +287,7 @@ Value *evaluate_op_add(ParseNode *node) {
         return evaluate_op_binary(node); // TODO: look at if double evaluation left and right has side effects
     }
 
-    Value *result = malloc(sizeof(Value));
+    Value *result = gc_malloc();
     if (left->type == TYPE_STRING && right->type == TYPE_STRING) {
         result->type = TYPE_STRING;
         unsigned int len_left = strlen(left->data.stringValue);
@@ -380,7 +389,7 @@ Value *evaluate_op_binary_float(ParseNode *node, Value *result, double left, dou
 Value *evaluate_op_binary(ParseNode *node) {
     Value *left = evaluate(node->left);
     Value *right = evaluate(node->right);
-    Value *result = malloc(sizeof(Value));
+    Value *result = gc_malloc();
 
     if (left->type == TYPE_INT && right->type == TYPE_INT) {
         evaluate_op_binary_int(node, result, left->data.intValue, right->data.intValue);
@@ -409,21 +418,21 @@ Value *evaluate_op_binary(ParseNode *node) {
 }
 
 Value *evaluate_op_eq(ParseNode *node) { // TODO: add string support
-    Value *eq = malloc(sizeof(Value));
+    Value *eq = gc_malloc();
     eq->type = TYPE_BOOL;
     eq->data.intValue = evaluate(node->left)->data.intValue == evaluate(node->right)->data.intValue;
     return eq;
 }
 
 Value *evaluate_op_neq(ParseNode *node) { // TODO: add string support
-    Value *neq = malloc(sizeof(Value));
+    Value *neq = gc_malloc();
     neq->type = TYPE_BOOL;
     neq->data.intValue = evaluate(node->left)->data.intValue != evaluate(node->right)->data.intValue;
     return neq;
 }
 
 Value *evaluate_op_not(ParseNode *node) {
-    Value *not = malloc(sizeof(Value));
+    Value *not = gc_malloc();
     not->type = TYPE_BOOL;
     not->data.intValue = !evaluate(node->left)->data.intValue;
     return not;
@@ -453,8 +462,9 @@ Value *evaluate_out(ParseNode *node) {
             break;
         default:
             runtime_error(node, "Invalid Output Type");
+            return NULL;
     }
-    return to_out;
+    return value_copy(to_out);
 }
 
 Value *evaluate_in(ParseNode *node) {
@@ -475,7 +485,7 @@ Value *evaluate_in(ParseNode *node) {
         nread--;
     }
 
-    Value *in = malloc(sizeof(Value));
+    Value *in = gc_malloc();
     in->type = TYPE_STRING;
     in->data.stringValue = line;
     return in;
@@ -544,7 +554,7 @@ Value *build_object(ParseNode *node, Value *class) {
     Value *body = evaluate(class->data.node->right);
     StackFrame *fields_stack = stack_pop(callStack);
 
-    Value *obj = malloc(sizeof(Value));
+    Value *obj = gc_malloc();
     obj->type = TYPE_OBJECT;
     obj->data.object_fields = fields_stack->local_variables;
     frame_destroy(fields_stack, 0);
