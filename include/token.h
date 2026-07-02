@@ -97,6 +97,7 @@ typedef struct List List;
 
 typedef struct Value {
     ValueType type;
+    int references;
     union {
         int intValue;
         double floatValue;

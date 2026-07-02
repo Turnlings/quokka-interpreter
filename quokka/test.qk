@@ -1,29 +1,10 @@
-import "quokka/bike.qk";
+def add(a,b) {
+    a + b;
 
-class Car(colour) {
-    speed = 10; // Any initialisation goes here
-
-    def print_colour {
-        >> colour;
-    }
-
-    def set_colour(col) {
-        // Use the set keyword to assign the variable to the objet
-        set colour = col; 
-    }
+    >> a;
 }
 
-car = Car("red");
+c = add(1,2);
 
-car.print_colour; // red
-
-car.set_colour("blue");
-
-car.print_colour; // blue
-
-list = [1, 2, car];
-
-a = 1;
-
-bike_two = Bike();
-bike_two.ring_bell;
+>> "C: ";
+>> c;

@@ -2,10 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include "token.h"
+#include "garbage_collector.h"
 
 typedef struct Pair {
     char *key;
-    Value value;
+    Value *value;
     struct Pair *next;
 } Pair;
 
@@ -57,13 +58,16 @@ void hashtable_set(HashTable *table, char *key, Value *value) {
     if (value == NULL) {
         printf("Attempted to assign null to key: %s\n", key);
     }
+
+    gc_reference(value);
+
     unsigned int pos = hash(key, table->size);
     Pair *entry = table->buckets[pos];
 
     while (entry) {
         // Identical key: update value
         if (strcmp(entry->key, key) == 0) {
-            entry->value = *value;
+            entry->value = value;
             return;
         }
         // Collision: append entry to linked list
@@ -73,7 +77,7 @@ void hashtable_set(HashTable *table, char *key, Value *value) {
     // No collision: add entry at that position
     Pair *new_entry = malloc(sizeof(Pair));
     new_entry->key = strdup(key);
-    new_entry->value = *value;
+    new_entry->value = value;
     new_entry->next = table->buckets[pos];
     table->buckets[pos] = new_entry;
 }
@@ -92,7 +96,7 @@ int hashtable_get(HashTable *table, const char *key, Value **out_value) {
     Pair *entry = table->buckets[pos];
     while (entry) {
         if (strcmp(entry->key, key) == 0) {
-            *out_value = &entry->value;
+            *out_value = entry->value;
             return 1;
         }
         entry = entry->next;
@@ -111,7 +115,7 @@ void hashtable_destroy(HashTable *table) {
         while (entry) {
             Pair *next = entry->next;
             free(entry->key);
-            value_destroy(entry->value);
+            gc_dereference(entry->value);
             free(entry);
             entry = next;
         }
