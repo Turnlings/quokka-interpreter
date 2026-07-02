@@ -14,6 +14,7 @@ List *list_create(int length);
 void list_copy(List *original, List *target, int offset);
 void list_add(List **plist, Value *item);
 Value *list_access(List *list, int index);
+void list_edit(List *list, int index, Value *item);
 void list_destroy(List *list);
 
 #endif

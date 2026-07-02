@@ -1,10 +1,14 @@
 key = "a";
 map = [key: 2, "b": 3];
 
-map[key];
+map[key] = 3;
 
 >> map[key];
->> map["b"];
+
 
 list = [1,2,3];
->> list[1];
+list[2] = 4;
+
+>> list[2];
+
+>> map["b"];

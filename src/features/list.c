@@ -46,6 +46,15 @@ Value *list_access(List *list, int index) {
     return list->items[index];
 }
 
+void list_edit(List *list, int index, Value *item) {
+    if (index < 0 || index > list->tail) {
+        fprintf(stderr, "Invalid index for list\n");
+        return;
+    }
+
+    list->items[index] = item;
+}
+
 void list_destroy(List *list) {
     free(list->items);
     free(list);

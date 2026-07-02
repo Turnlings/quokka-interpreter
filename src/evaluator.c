@@ -163,13 +163,38 @@ Value *evaluate_import(ParseNode *node) {
 }
 
 Value *evaluate_assignment(ParseNode *node) {
-    if (!node->left || !node->left->value.data.stringValue) {
+    if (!node->left) {
         runtime_error(node, "Invalid assignment target");
         return NULL;
     }
-    Value *value = evaluate(node->right);
-    hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
-    return value;
+
+    Value *value;
+
+    switch (node->left->type)
+    {
+    case IDENTIFIER:
+        value = evaluate(node->right);
+        hashtable_set(stack_peek(callStack)->local_variables, node->left->value.data.stringValue, value);
+        return value;
+
+    case OP_INDEX:
+        Value *container = evaluate(node->left->left);
+        Value *index = evaluate(node->left->right);
+        value = evaluate(node->right);
+        if (container->type == TYPE_LIST) {
+            list_edit(container->data.list, index->data.intValue, value);
+        } else if (container->type == TYPE_MAP) {
+            hashmap_set(container->data.map, index->data.stringValue, value);
+        } else {
+            runtime_error(node, "Invalid assignment target");
+            return NULL;
+        }
+        return value;
+    
+    default:
+        runtime_error(node, "Invalid assignment target");
+        return NULL;
+    }
 }
 
 Value *evaluate_set(ParseNode *node) {
