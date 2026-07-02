@@ -1,5 +1,5 @@
 key = "a";
-map = [: key: 2, "b": 3];
+map = [key: 2, "b": 3];
 
 map[key];
 

@@ -55,6 +55,8 @@ int main(int argc, char *argv[]) {
             printf("\n");
         }
 
+        set_debug_mode_evaluator(debug);
+
         Value *return_value = evaluate(ast);
         if (return_value == NULL) {
             fprintf(stderr, "Evaluation failed\n");

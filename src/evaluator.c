@@ -46,6 +46,10 @@ CallStack *callStack = NULL;
 bool debug_mode = false;
 int evaluate_depth = 0;
 
+void set_debug_mode_evaluator(bool debug) {
+    debug_mode = debug;
+}
+
 /**
  * @brief Evaluates a given AST to a return value
  * @param node The root node of the AST
@@ -228,9 +232,7 @@ Value *evaluate_map(ParseNode *node) {
     node = node->right;
     while(node!=NULL) {
         Value *key = evaluate(node->left->left);
-        print_value(key);
         Value *value = evaluate(node->left->right);
-        printf("Key Type: %d\n", key->type);
         if (key->type != TYPE_STRING) {
             runtime_error(node, "Map key must be a string");
             return NULL;
