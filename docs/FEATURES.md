@@ -9,6 +9,7 @@
 - [Functions](#functions)
 - [Print to Console](#print-to-console)
 - [Lists](#lists)
+- [HashMaps](#hashmaps)
 - [Classes and Objects](#classes-and-objects)
 - [Imports](#imports)
 
@@ -93,6 +94,15 @@ b = [1, 0.1, "quokka"] // You can mix types
 b[2] //"quokka"
 
 c = a + b; // [1,2,3,1,0.1,"quokka"]
+```
+
+### HashMaps
+```c
+map = ["a": 1, "b": 2, "c": 3]
+map["b"] // 2
+
+empty_map = [:] // The colon (:) distinguishes it from a list
+empty_map["lemons"] = 243 // Assignment works the same as elsewhere
 ```
 
 ### Classes and Objects
