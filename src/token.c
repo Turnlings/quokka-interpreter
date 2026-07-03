@@ -43,8 +43,10 @@ const char *token_type_to_string(TokenType type) {
 }
 
 Value *value_create(ValueType type) {
-    Value *value = malloc(sizeof(Value));
+    Value *value = gc_malloc();
     value->type = type;
+
+    return value;
 }
 
 Value *value_copy(Value *old) {

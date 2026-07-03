@@ -7,6 +7,7 @@
 #include "utils/file_utils.h"
 #include "features/list.h"
 #include "features/hashmap.h"
+#include "features/std.h"
 #include "evaluator.h"
 #include "lexer.h"
 #include "parser.h"
@@ -311,6 +312,13 @@ Value *evaluate_identifier(ParseNode *node) {
     Value *id_value;
     int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
     if (found == 0) {
+        // TODO: properly sort out args
+        Value *value = evaluate(node->right);
+
+        Value *val = evaluate_std_lib_function(node->value.data.stringValue, &value);
+        if (val != NULL) {
+            return val;
+        }
         error_and_exit(node, "Identifier not yet declared");
     }
     switch (id_value->type) {

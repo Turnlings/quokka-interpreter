@@ -115,7 +115,7 @@ class Car(colour) {
     }
 
     def set_colour(col) {
-        // Use the set keyword to assign the variable to the objet
+        // Use the set keyword to assign the variable to the object
         set colour = col; 
     }
 }
