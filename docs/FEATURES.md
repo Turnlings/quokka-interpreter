@@ -58,7 +58,7 @@ while a <= b do {
 ### For Loops
 For loops have three parameters, an initialiser, a condition, and an increment.
 ```c
-for int i = 0; i <= 10; i = i + 1; {
+for i = 0; i <= 10; i = i + 1; {
     >> i; // Prints numbers 0 to 10 inclusive
 }
 ```

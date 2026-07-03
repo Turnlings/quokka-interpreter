@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "features/list.h"
+#include "garbage_collector.h"
 
 List *list_create(int length) {
     List *list = malloc(sizeof(List));
@@ -18,6 +19,7 @@ void list_copy(List *original, List *target, int offset) {
 
     for (int i = 0; i <= original->tail; i++) {
         target->items[i + offset] = original->items[i];
+        gc_reference(target->items[i + offset]);
     }
 
     target->tail = original->tail + offset;
@@ -35,6 +37,7 @@ void list_add(List **plist, Value *item) {
     }
 
     list->items[++list->tail] = item;
+    gc_reference(item);
 }
 
 Value *list_access(List *list, int index) {
@@ -52,10 +55,15 @@ void list_edit(List *list, int index, Value *item) {
         return;
     }
 
+    gc_dereference(list->items[index]);
     list->items[index] = item;
+    gc_reference(item);
 }
 
 void list_destroy(List *list) {
+    for (int i = 0; i <= list->tail; i++) {
+        gc_dereference(list->items[i]);
+    }
     free(list->items);
     free(list);
 }

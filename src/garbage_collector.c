@@ -15,6 +15,7 @@ void gc_dereference(Value *value) {
 
 Value *gc_malloc() {
     Value *value = calloc(1, sizeof(Value));
+    if (!value) { return NULL; }
     value->references = 0;
     return value;
 }
