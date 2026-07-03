@@ -308,14 +308,44 @@ Value *evaluate_op_index(ParseNode *node) {
     }
 }
 
+int parse_arg_count(ParseNode *arg) {
+    // Find number of args with first pass
+    int arg_c = 0;
+    ParseNode *temp = arg;
+    while (temp) {
+        arg_c++;
+        temp = temp->right;
+    }
+    return arg_c;
+}
+
+bool evaluate_parse_args(ParseNode *arg, Value **args, int arg_c) {
+    // Build args array with second pass
+    int i = 0;
+    while (arg) {
+        if (i >= arg_c) {
+            return false;
+        }
+        args[i++] = evaluate(arg);
+        arg = arg->right;
+    }
+    return true;
+}
+
 Value *evaluate_identifier(ParseNode *node) {
     Value *id_value;
     int found = stack_get_value(callStack, node->value.data.stringValue, &id_value);
     if (found == 0) {
-        // TODO: properly sort out args
-        Value *value = evaluate(node->right);
+        int arg_c = parse_arg_count(node->right);
+        Value *args[arg_c];
+        bool parsed = evaluate_parse_args(node->right, args, arg_c);
+        if (!parsed) {
+            error_and_exit(node, "Failed to parse function arguments");
+        }
 
-        Value *val = evaluate_std_lib_function(node->value.data.stringValue, &value);
+        if (debug_mode) { printf("Function call has %d arguments\n", arg_c); }
+
+        Value *val = evaluate_std_lib_function(node->value.data.stringValue, args, arg_c);
         if (val != NULL) {
             return val;
         }

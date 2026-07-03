@@ -1,2 +1,2 @@
-a = "cats";
+a = [1, 2, len("abc")];
 len(a);
