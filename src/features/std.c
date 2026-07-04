@@ -3,7 +3,8 @@
 #include "features/list.h"
 
 typedef enum {
-    STD_LEN
+    STD_LEN,
+    STD_RANGE
 } StdLib;
 
 Value *std_len(Value *arg) {
@@ -20,9 +21,24 @@ Value *std_len(Value *arg) {
     return NULL;
 }
 
+Value *std_range(Value *arg) {
+    if (arg->type == TYPE_INT) {
+        int size = arg->data.intValue;
+        Value *value = value_create(TYPE_LIST);
+        value->data.list = list_create(size);
+        for (int i = 0; i < size; i++) {
+            Value *item = value_create(TYPE_INT);
+            item->data.intValue = i;
+            list_add(&value->data.list, item);
+        }
+        return value;
+    }
+    return NULL;
+}
+
 StdLib parse_name(char *name) {
-    printf("Parsing function: %s\n", name);
     if (strcmp(name, "len") == 0) { return STD_LEN; }
+    if (strcmp(name, "range") == 0) { return STD_RANGE; }
     return -1;
 }
 
@@ -30,6 +46,7 @@ Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
     StdLib func = parse_name(name);
     switch (func) {
         case STD_LEN: return std_len(args[0]);
+        case STD_RANGE: return std_range(args[0]);
         default: return NULL;
     }
 }
