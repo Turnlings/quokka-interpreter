@@ -571,6 +571,9 @@ Value *evaluate_out(ParseNode *node) {
         case TYPE_STRING:
             printf("%s\n",to_out->data.stringValue);
             break;
+        case TYPE_ERROR:
+            printf("ERROR: %s\n",to_out->data.stringValue);
+            break;
         default:
             runtime_error(node, "Invalid Output Type");
             return NULL;

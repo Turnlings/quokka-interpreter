@@ -1,3 +1,4 @@
+#include <string.h>
 #include "token.h"
 #include "features/list.h"
 #include "utils/hash_table.h"
@@ -61,6 +62,7 @@ Value *value_copy(Value *old) {
             copy->data.floatValue = old->data.floatValue;
             break;
         case TYPE_STRING:
+        case TYPE_ERROR:
             if (old->data.stringValue)
                 copy->data.stringValue = strdup(old->data.stringValue);
             else
@@ -104,6 +106,12 @@ void value_destroy(Value value) {
     }
 }
 
+Value *error(char* msg) {
+    Value *err = value_create(TYPE_ERROR);
+    err->data.stringValue = strdup(msg);
+    return err;
+}
+
 void print_value(Value *value) {
     if (value == NULL) {
         printf("NULL");
@@ -130,7 +138,11 @@ void print_value(Value *value) {
             }
         }
         printf("]");
-    } else {
+    }  
+    else if (value->type == TYPE_ERROR) {
+        printf("ERROR: %s", value->data.stringValue);
+    }
+    else {
         printf("VALUE(?)");
         printf("Type: %d", value->type);
     }

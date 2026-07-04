@@ -42,8 +42,7 @@ void list_add(List **plist, Value *item) {
 
 Value *list_access(List *list, int index) {
     if (index < 0 || index > list->tail) {
-        fprintf(stderr, "Invalid index for list\n");
-        return NULL;
+        return error("Invalid index for list");
     }
 
     return list->items[index];

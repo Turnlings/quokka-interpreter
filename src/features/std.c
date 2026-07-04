@@ -53,7 +53,7 @@ int correct_arg_count(StdLib func, int arg_c) {
 Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
     StdLib func = parse_name(name);
     if (!correct_arg_count(func, arg_c)) {
-        return NULL;
+        return error("Incorrect number of arguments");
     }
     switch (func) {
         case STD_LEN: return std_len(args[0]);

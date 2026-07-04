@@ -92,7 +92,8 @@ typedef enum {
     TYPE_FUNCTION,
     TYPE_CLASS,
     TYPE_OBJECT,
-    TYPE_METADATA
+    TYPE_METADATA,
+    TYPE_ERROR
 } ValueType;
 
 typedef struct ParseNode ParseNode;
@@ -116,6 +117,8 @@ Value *value_create(ValueType value);
 Value *value_copy(Value *old);
 void print_value(Value *value);
 void value_destroy(Value value);
+
+Value *error(char* msg);
 
 typedef struct Token {
     TokenType category;
