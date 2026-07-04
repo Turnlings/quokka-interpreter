@@ -42,8 +42,19 @@ StdLib parse_name(char *name) {
     return -1;
 }
 
+int correct_arg_count(StdLib func, int arg_c) {
+    switch (func) {
+        case STD_LEN:   return arg_c == 1;
+        case STD_RANGE: return arg_c == 1;
+        default: return 0;
+    }
+}
+
 Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
     StdLib func = parse_name(name);
+    if (!correct_arg_count(func, arg_c)) {
+        return NULL;
+    }
     switch (func) {
         case STD_LEN: return std_len(args[0]);
         case STD_RANGE: return std_range(args[0]);
