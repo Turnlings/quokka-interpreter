@@ -4,7 +4,8 @@
 
 typedef enum {
     STD_LEN,
-    STD_RANGE
+    STD_RANGE,
+    STD_SUM,
 } StdLib;
 
 Value *std_len(Value *arg) {
@@ -36,9 +37,45 @@ Value *std_range(Value *arg) {
     return error("Invalid argument type for range");
 }
 
+Value *std_sum(Value *arg) {
+    if (arg->type == TYPE_LIST) {
+        if (arg->data.list->tail >= 0) {
+            ValueType type = list_access(arg->data.list, 0)->type;
+            int sum_i = 0;
+            float sum_f = 0.0f;
+            
+            for (int i = 0; i <= arg->data.list->tail; i++) {
+                Value *item = list_access(arg->data.list, i);
+                if (item->type != type) {
+                    return error("Inconsistent types in list for sum");
+                }
+                if (item->type == TYPE_INT) {
+                    sum_i += item->data.intValue;
+                }
+                if (item->type == TYPE_FLOAT) {
+                    sum_f += item->data.floatValue;
+                }
+            }
+
+            if (type == TYPE_INT) {
+                Value *value = value_create(TYPE_INT);
+                value->data.intValue = sum_i;
+                return value;
+            }
+            if (type == TYPE_FLOAT) {
+                Value *value = value_create(TYPE_FLOAT);
+                value->data.floatValue = sum_f;
+                return value;
+            }
+        }
+    }
+    return error("Invalid argument type for sum");
+}
+
 StdLib parse_name(char *name) {
     if (strcmp(name, "len") == 0) { return STD_LEN; }
     if (strcmp(name, "range") == 0) { return STD_RANGE; }
+    if (strcmp(name, "sum") == 0) { return STD_SUM; }
     return -1;
 }
 
@@ -46,6 +83,7 @@ int correct_arg_count(StdLib func, int arg_c) {
     switch (func) {
         case STD_LEN:   return arg_c == 1;
         case STD_RANGE: return arg_c == 1;
+        case STD_SUM:   return arg_c == 1;
         default: return 1;
     }
 }
@@ -58,6 +96,7 @@ Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
     switch (func) {
         case STD_LEN: return std_len(args[0]);
         case STD_RANGE: return std_range(args[0]);
+        case STD_SUM: return std_sum(args[0]);
         default: return NULL; // Means function is not part of std lib
     }
 }
