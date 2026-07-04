@@ -288,7 +288,11 @@ Value *evaluate_op_index(ParseNode *node) {
             return NULL;
         }
 
-        return list_access(container->data.list, index->data.intValue);
+        Value *item = list_access(container->data.list, index->data.intValue);
+        if (item->type == TYPE_ERROR) {
+            error_and_exit(node, item->data.stringValue);
+        }
+        return item;
 
     } else if (container->type == TYPE_MAP) {
         if (index->type != TYPE_STRING) {
@@ -346,6 +350,9 @@ Value *evaluate_identifier(ParseNode *node) {
         if (debug_mode) { printf("Function call has %d arguments\n", arg_c); }
 
         Value *val = evaluate_std_lib_function(node->value.data.stringValue, args, arg_c);
+        if (val->type == TYPE_ERROR) {
+            error_and_exit(node, val->data.stringValue);
+        }
         if (val != NULL) {
             return val;
         }

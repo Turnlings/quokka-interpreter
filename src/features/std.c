@@ -18,7 +18,7 @@ Value *std_len(Value *arg) {
         value->data.intValue = arg->data.list->tail + 1;
         return value;
     }
-    return NULL;
+    return error("Invalid argument type for len");
 }
 
 Value *std_range(Value *arg) {
@@ -33,7 +33,7 @@ Value *std_range(Value *arg) {
         }
         return value;
     }
-    return NULL;
+    return error("Invalid argument type for range");
 }
 
 StdLib parse_name(char *name) {
@@ -46,7 +46,7 @@ int correct_arg_count(StdLib func, int arg_c) {
     switch (func) {
         case STD_LEN:   return arg_c == 1;
         case STD_RANGE: return arg_c == 1;
-        default: return 0;
+        default: return 1;
     }
 }
 
@@ -58,6 +58,6 @@ Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
     switch (func) {
         case STD_LEN: return std_len(args[0]);
         case STD_RANGE: return std_range(args[0]);
-        default: return NULL;
+        default: return NULL; // Means function is not part of std lib
     }
 }
