@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "token.h"
+#include "features/list.h"
 #include "garbage_collector.h"
 
 typedef struct Pair {
@@ -122,4 +123,23 @@ void hashtable_destroy(HashTable *table) {
     }
     free(table->buckets);
     free(table);
+}
+
+int unhandled_errors(HashTable *table, List *errors) {
+    int counter = 0;
+    for (size_t i = 0; i < table->size; i++) {
+        Pair *entry = table->buckets[i];
+        while (entry) {
+            Pair *next = entry->next;
+            
+            if (entry->value->type == TYPE_ERROR) {
+                list_add(&errors, entry->value);
+                counter += 1;
+            }
+
+            entry = next;
+        }
+    }
+
+    return counter;
 }

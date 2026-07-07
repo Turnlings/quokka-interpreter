@@ -116,6 +116,18 @@ Value *evaluate_program(ParseNode *node) {
     if (evaluated == NULL) {
         return NULL;
     }
+    if (evaluated->type == TYPE_ERROR) {
+        printf("here\n");
+        error_and_exit(node, evaluated->data.stringValue);
+    }
+    List *errors = list_create(1);
+    int error_count = stack_unhandled_errors(callStack, errors);
+    if (error_count) {
+        for (int i = 0; i<=errors->tail; i++) {
+            runtime_error(node, list_access(errors, i)->data.stringValue);
+        }
+        error_and_exit(node, "Remaining errors in callstack to be fixed");
+    }
 
     Value *program_return = value_copy(evaluated);
     cleanup();
@@ -289,9 +301,6 @@ Value *evaluate_op_index(ParseNode *node) {
         }
 
         Value *item = list_access(container->data.list, index->data.intValue);
-        if (item->type == TYPE_ERROR) {
-            error_and_exit(node, item->data.stringValue);
-        }
         return item;
 
     } else if (container->type == TYPE_MAP) {
@@ -350,9 +359,6 @@ Value *evaluate_identifier(ParseNode *node) {
         if (debug_mode) { printf("Function call has %d arguments\n", arg_c); }
 
         Value *val = evaluate_std_lib_function(node->value.data.stringValue, args, arg_c);
-        if (val->type == TYPE_ERROR) {
-            error_and_exit(node, val->data.stringValue);
-        }
         if (val != NULL) {
             return val;
         }
@@ -719,7 +725,6 @@ Value *call_object(ParseNode *node) {
 void runtime_error(ParseNode *node, char* string) {
     printf("\nRuntime Error: %s on line %d.\nCallstack:\n", string, node->line);
     stack_print(callStack);
-
 }
 
 void cleanup() {

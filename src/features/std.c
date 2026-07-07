@@ -6,6 +6,8 @@ typedef enum {
     STD_LEN,
     STD_RANGE,
     STD_SUM,
+    STD_ERROR,
+    STD_HANDLE_ERROR,
 } StdLib;
 
 Value *std_len(Value *arg) {
@@ -72,18 +74,41 @@ Value *std_sum(Value *arg) {
     return error("Invalid argument type for sum");
 }
 
+Value *std_error(Value *arg) {
+    if (arg->type != TYPE_STRING) {
+        return error("Invalid argument type for error");
+    }
+    return error(arg->data.stringValue);
+}
+
+Value *std_handle_error(Value *arg) {
+    Value *value = value_create(TYPE_BOOL);
+    int is_error = arg->type == TYPE_ERROR;
+    value->data.intValue = (is_error);
+
+    if (is_error) {
+        arg->type = TYPE_ERROR_HANDLED;
+    }
+
+    return value;
+}
+
 StdLib parse_name(char *name) {
     if (strcmp(name, "len") == 0) { return STD_LEN; }
     if (strcmp(name, "range") == 0) { return STD_RANGE; }
     if (strcmp(name, "sum") == 0) { return STD_SUM; }
+    if (strcmp(name, "handle") == 0) { return STD_HANDLE_ERROR; }
+    if (strcmp(name, "error") == 0) { return STD_ERROR; }
     return -1;
 }
 
 int correct_arg_count(StdLib func, int arg_c) {
     switch (func) {
-        case STD_LEN:   return arg_c == 1;
-        case STD_RANGE: return arg_c == 1;
-        case STD_SUM:   return arg_c == 1;
+        case STD_LEN:      return arg_c == 1;
+        case STD_RANGE:    return arg_c == 1;
+        case STD_SUM:      return arg_c == 1;
+        case STD_HANDLE_ERROR: return arg_c == 1;
+        case STD_ERROR:    return arg_c == 1;
         default: return 1;
     }
 }
@@ -97,6 +122,8 @@ Value *evaluate_std_lib_function(char *name, Value **args, int arg_c) {
         case STD_LEN: return std_len(args[0]);
         case STD_RANGE: return std_range(args[0]);
         case STD_SUM: return std_sum(args[0]);
+        case STD_HANDLE_ERROR: return std_handle_error(args[0]);
+        case STD_ERROR: return std_error(args[0]);
         default: return NULL; // Means function is not part of std lib
     }
 }

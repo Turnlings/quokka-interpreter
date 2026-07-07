@@ -102,3 +102,11 @@ void stack_print(CallStack *stack) {
     }
     printf("\n");
 }
+
+int stack_unhandled_errors(CallStack *stack, List *errors) {
+    int count = 0;
+    for (int i = stack->top; i >= 0; i--) {
+        count += unhandled_errors(stack->frames[i]->local_variables, errors);
+    }
+    return count;
+}

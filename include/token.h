@@ -93,7 +93,8 @@ typedef enum {
     TYPE_CLASS,
     TYPE_OBJECT,
     TYPE_METADATA,
-    TYPE_ERROR
+    TYPE_ERROR,
+    TYPE_ERROR_HANDLED,
 } ValueType;
 
 typedef struct ParseNode ParseNode;

@@ -25,6 +25,7 @@ StackFrame *stack_pop(CallStack *stack);
 StackFrame *stack_peek(CallStack *stack);
 int stack_get_value(CallStack *stack, const char *key, Value **out_value);
 void stack_destroy(CallStack *stack);
+int stack_unhandled_errors(CallStack *stack, List *errors);
 
 void stack_print(CallStack *stack);
 

@@ -272,4 +272,5 @@ void free_ast(ParseNode *node) {
     }
 
     free(node);
+    node = NULL;
 }
